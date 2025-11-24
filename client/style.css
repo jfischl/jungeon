@@ -180,6 +180,8 @@ body {
     padding: 1rem;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .status-box {

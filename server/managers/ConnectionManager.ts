@@ -139,6 +139,16 @@ export class ConnectionManager {
         this.broadcastToRoom(player.roomId, `${player.character.name} has entered the game.`, socket.id);
         this.look(socket);
         this.sendStats(socket);
+
+        // Show welcome message with saved state for returning players
+        const isReturning = savedPlayers && savedPlayers[charId];
+        if (isReturning) {
+            const itemCount = inventory.items.length;
+            const itemText = itemCount === 1 ? '1 item' : `${itemCount} items`;
+            socket.emit('message', `Welcome back! Your progress has been restored: ${inventory.coins} coins, ${itemText}.`);
+        } else {
+            socket.emit('message', 'Welcome to The Jungeon! Type "look" to see your surroundings.');
+        }
     }
 
     /**

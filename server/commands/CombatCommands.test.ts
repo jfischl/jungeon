@@ -3,6 +3,7 @@ import { DefendCommand } from './DefendCommand';
 import { HealCommand } from './HealCommand';
 import { GameManager } from '../game';
 import { Server } from 'socket.io';
+import { setupMockGameManager } from '../testFixtures';
 
 describe('Combat Commands Integration Tests', () => {
     let gameManager: any;
@@ -21,6 +22,7 @@ describe('Combat Commands Integration Tests', () => {
         } as any;
 
         gameManager = new GameManager(mockIo);
+        setupMockGameManager(gameManager);
         fleeCommand = new FleeCommand();
         defendCommand = new DefendCommand();
         healCommand = new HealCommand();

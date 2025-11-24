@@ -1,6 +1,7 @@
 import { AttackCommand } from './AttackCommand';
 import { GameManager } from '../game';
 import { Server } from 'socket.io';
+import { setupMockGameManager } from '../testFixtures';
 
 describe('Shared Ghost Combat (Phase 2)', () => {
     let gameManager: any;
@@ -21,6 +22,7 @@ describe('Shared Ghost Combat (Phase 2)', () => {
         } as any;
 
         gameManager = new GameManager(mockIo);
+        setupMockGameManager(gameManager);
         attackCommand = new AttackCommand();
 
         // Mock socket 1

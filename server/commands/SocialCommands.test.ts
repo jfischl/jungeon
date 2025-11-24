@@ -2,6 +2,7 @@ import { SayCommand } from './SayCommand';
 import { EmoteCommand } from './EmoteCommand';
 import { GameManager } from '../game';
 import { Server } from 'socket.io';
+import { setupMockGameManager } from '../testFixtures';
 
 describe('Social Commands', () => {
     let gameManager: GameManager;
@@ -20,6 +21,7 @@ describe('Social Commands', () => {
         } as any;
 
         gameManager = new GameManager(mockIo);
+        setupMockGameManager(gameManager);
         sayCommand = new SayCommand();
         emoteCommand = new EmoteCommand();
 

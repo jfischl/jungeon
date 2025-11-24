@@ -3,6 +3,7 @@ import { AcceptCommand } from './AcceptCommand';
 import { AttackCommand } from './AttackCommand';
 import { GameManager } from '../game';
 import { Server } from 'socket.io';
+import { setupMockGameManager } from '../testFixtures';
 
 describe('PvP System Integration Tests', () => {
     let gameManager: any;
@@ -22,6 +23,7 @@ describe('PvP System Integration Tests', () => {
         } as any;
 
         gameManager = new GameManager(mockIo);
+        setupMockGameManager(gameManager);
         challengeCommand = new ChallengeCommand();
         acceptCommand = new AcceptCommand();
         attackCommand = new AttackCommand();

@@ -4,6 +4,7 @@ import { ExamineCommand } from './ExamineCommand';
 import { UnlockCommand } from './UnlockCommand';
 import { GameManager } from '../game';
 import { Server } from 'socket.io';
+import { setupMockGameManager } from '../testFixtures';
 
 describe('Item Commands', () => {
     let gameManager: GameManager;
@@ -23,6 +24,7 @@ describe('Item Commands', () => {
         } as any;
 
         gameManager = new GameManager(mockIo);
+        setupMockGameManager(gameManager);
         getCommand = new GetCommand();
         dropCommand = new DropCommand();
         examineCommand = new ExamineCommand();

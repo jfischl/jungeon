@@ -1,6 +1,7 @@
 import { AttackCommand } from './AttackCommand';
 import { GameManager } from '../game';
 import { Server } from 'socket.io';
+import { setupMockGameManager } from '../testFixtures';
 
 describe('AttackCommand - Ghost Combat (PvE)', () => {
     let gameManager: any;
@@ -17,6 +18,7 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
         } as any;
 
         gameManager = new GameManager(mockIo);
+        setupMockGameManager(gameManager);
         attackCommand = new AttackCommand();
 
         // Mock socket

@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { GameManager } from './game';
 import { MapGenerator } from './map-generator';
+import { serverLogger } from './logger';
 
 const app = express();
 const server = http.createServer(app);
@@ -21,9 +22,10 @@ const PORT = process.env.PORT || 3000;
 
 // CLI Argument Handling
 if (process.argv.includes('--generate')) {
-    console.log("Generating new world...");
+    serverLogger.info('Generating new world...');
     const generator = new MapGenerator();
     generator.generate();
+    serverLogger.info('World generation complete');
     // We continue to start the server after generation
 }
 
@@ -37,5 +39,12 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    serverLogger.info(
+        {
+            port: PORT,
+            env: process.env.NODE_ENV || 'development',
+            logLevel: process.env.LOG_LEVEL || 'info'
+        },
+        'Server started'
+    );
 });

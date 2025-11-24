@@ -24,6 +24,7 @@ import { validateCommandInput, parseCommand, sanitizeInput, isValidMessage } fro
 import { PlayerManager } from './managers/PlayerManager';
 import { RoomManager } from './managers/RoomManager';
 import { GhostManager, Ghost } from './managers/GhostManager';
+import { gameLogger, playerLogger } from './logger';
 
 export class GameManager {
     io: Server;
@@ -145,21 +146,24 @@ export class GameManager {
     }
 
     loadGame(): void {
-        console.log("Loading game data...");
+        gameLogger.info('Loading game data...');
         const loadedWorld = this.repository.loadWorld();
         if (loadedWorld) {
             this.worldData = loadedWorld;
             this.roomManager.loadWorldData(loadedWorld);
-            console.log("World loaded.");
+            gameLogger.info({ roomCount: Object.keys(loadedWorld.rooms).length }, 'World loaded');
         } else {
-            console.error("No world.json found! Run with --generate first.");
+            gameLogger.error('No world.json found! Run with --generate first');
         }
 
         this.characters = this.repository.loadCharacters();
+        gameLogger.info({ characterCount: this.characters.length }, 'Characters loaded');
     }
 
     saveGame(): void {
-        console.log("Saving game...");
+        const playerCount = this.playerManager.getAllPlayers().length;
+        gameLogger.debug({ playerCount }, 'Saving game...');
+
         // Save World
         const world = this.roomManager.getWorldData();
         this.repository.saveWorld(world);
@@ -177,20 +181,23 @@ export class GameManager {
             }
         }
         this.repository.savePlayers(playersToSave);
-        console.log("Game saved successfully.");
+        gameLogger.debug({ playerCount }, 'Game saved successfully');
     }
 
     handleConnect(socket: Socket): void {
-        console.log('Player connected:', socket.id);
+        playerLogger.info({ socketId: socket.id }, 'Player connected');
 
         socket.on('disconnect', () => {
             if (this.players.has(socket.id)) {
                 const player = this.players.get(socket.id)!;
+                playerLogger.info(
+                    { socketId: socket.id, character: player.character.name },
+                    'Player disconnected'
+                );
                 this.broadcastToRoom(player.roomId, `${player.character.name} has disconnected.`, socket.id);
                 this.players.delete(socket.id);
                 this.saveGame();
             }
-            console.log(`Player disconnected: ${socket.id}`);
         });
 
         socket.on('login', (charId: string) => {
@@ -499,7 +506,17 @@ export class GameManager {
     debug(socket: Socket): void {
         const player = this.players.get(socket.id)!;
         const room = this.rooms[player.roomId];
-        console.log(`DEBUG: Player ${player.character.name} at ${player.roomId} (${room.x},${room.y})`);
+        gameLogger.debug(
+            {
+                player: player.character.name,
+                roomId: player.roomId,
+                x: room.x,
+                y: room.y,
+                hp: player.hp,
+                level: player.level
+            },
+            'Debug info requested'
+        );
         socket.emit('message', `DEBUG: Room ${room.id} at ${room.x},${room.y}`);
     }
 

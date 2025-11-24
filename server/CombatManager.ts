@@ -2,6 +2,7 @@ import { Player } from '../shared/types';
 import { Socket } from 'socket.io';
 import { GameManager } from './game';
 import { CONFIG } from './config';
+import { combatLogger } from './logger';
 
 export class CombatManager {
     private game: GameManager;
@@ -76,6 +77,27 @@ export class CombatManager {
                     `You defeated ${deadPlayer.character.name}! +${goldLoss} coins, +${CONFIG.DEATH.PVP_XP_REWARD} XP`
                 );
             }
+
+            combatLogger.info(
+                {
+                    victim: deadPlayer.character.name,
+                    killer: killer.character.name,
+                    goldTransferred: goldLoss,
+                    xpLost: CONFIG.DEATH.XP_LOSS,
+                    type: 'pvp'
+                },
+                'Player death (PvP)'
+            );
+        } else {
+            combatLogger.info(
+                {
+                    player: deadPlayer.character.name,
+                    goldLost: goldLoss,
+                    xpLost: CONFIG.DEATH.XP_LOSS,
+                    type: 'pve'
+                },
+                'Player death (PvE)'
+            );
         }
 
         // Reset player
@@ -99,6 +121,7 @@ export class CombatManager {
         player.experience += xp;
 
         // Check for level up
+        const oldLevel = player.level;
         const newLevel = Math.floor(player.experience / CONFIG.LEVELING.XP_PER_LEVEL) + 1;
         if (newLevel > player.level) {
             player.level = newLevel;
@@ -106,6 +129,20 @@ export class CombatManager {
             player.hp = player.maxHp; // Full heal on level up
             player.attack += CONFIG.LEVELING.ATTACK_PER_LEVEL;
             player.defense += CONFIG.LEVELING.DEFENSE_PER_LEVEL;
+
+            combatLogger.info(
+                {
+                    player: player.character.name,
+                    oldLevel,
+                    newLevel,
+                    stats: {
+                        maxHp: player.maxHp,
+                        attack: player.attack,
+                        defense: player.defense
+                    }
+                },
+                'Player level up'
+            );
 
             socket.emit('message',
                 `🎉 LEVEL UP! You are now level ${player.level}! +${CONFIG.LEVELING.HP_PER_LEVEL} HP, +${CONFIG.LEVELING.ATTACK_PER_LEVEL} ATK, +${CONFIG.LEVELING.DEFENSE_PER_LEVEL} DEF`

@@ -2,7 +2,14 @@ import { io, Socket } from 'socket.io-client';
 import { RoomDataPacket, Inventory, Player } from '../../shared/types';
 
 console.log("Connecting to server at:", import.meta.env.VITE_SERVER_URL || 'http://localhost:3000');
-const socket: Socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3000');
+const socket: Socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3000', {
+    transports: ['websocket', 'polling'],
+    reconnectionDelay: 1000,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    timeout: 20000,
+    forceNew: true
+});
 
 const output = document.getElementById('output') as HTMLDivElement;
 const input = document.getElementById('input') as HTMLInputElement;

@@ -21,24 +21,24 @@ import { ChallengeCommand } from './commands/ChallengeCommand';
 import { AcceptCommand } from './commands/AcceptCommand';
 import { CONFIG } from './config';
 import { validateCommandInput, parseCommand, sanitizeInput, isValidMessage } from '../shared/validators';
+import { PlayerManager } from './managers/PlayerManager';
+import { RoomManager } from './managers/RoomManager';
+import { GhostManager, Ghost } from './managers/GhostManager';
 
 export class GameManager {
     io: Server;
+    // Legacy properties for backward compatibility
     players: Map<string, Player>;
     rooms: Record<string, Room>;
-    characters: Character[];
+    ghosts: Ghost[];
     worldData: WorldData;
-    ghosts: {
-        name: string;
-        desc: string;
-        roomId: string;
-        hp: number;
-        maxHp: number;
-        attack: number;
-        defense: number;
-        goldReward: number;
-        combatants: Set<string>; // Player IDs fighting this ghost
-    }[];
+
+    // Entity managers
+    private playerManager: PlayerManager;
+    private roomManager: RoomManager;
+    private ghostManager: GhostManager;
+
+    characters: Character[];
     combatManager: CombatManager;
     pendingChallenges: Map<string, { challengerId: string; targetId: string; timestamp: number }>;
 
@@ -47,11 +47,52 @@ export class GameManager {
 
     constructor(io: Server) {
         this.io = io;
-        this.players = new Map();
-        this.rooms = {};
-        this.characters = [];
-        this.ghosts = [];
+
+        // Initialize managers
+        this.playerManager = new PlayerManager();
+        this.roomManager = new RoomManager();
+        this.ghostManager = new GhostManager(() => this.getRandomRoomId());
+
+        // Legacy properties - proxy to managers
+        const playerMap = new Map<string, Player>();
+        this.players = new Proxy(playerMap, {
+            get: (target, prop) => {
+                if (prop === 'get') return (id: string) => this.playerManager.getPlayer(id);
+                if (prop === 'set') return (id: string, player: Player) => {
+                    this.playerManager.addPlayer(id, player);
+                    return this.players;
+                };
+                if (prop === 'has') return (id: string) => this.playerManager.hasPlayer(id);
+                if (prop === 'delete') return (id: string) => this.playerManager.removePlayer(id);
+                if (prop === 'values') return () => this.playerManager.getAllPlayers().values();
+                if (prop === 'entries') return () => {
+                    const players = this.playerManager.getAllPlayers();
+                    return players.map(p => [p.id, p] as [string, Player])[Symbol.iterator]();
+                };
+                if (prop === Symbol.iterator) return () => {
+                    const players = this.playerManager.getAllPlayers();
+                    return players.map(p => [p.id, p] as [string, Player])[Symbol.iterator]();
+                };
+                return Reflect.get(target, prop, target);
+            }
+        });
+
+        this.rooms = new Proxy({}, {
+            get: (target, prop: string) => this.roomManager.getRoom(prop)
+        }) as Record<string, Room>;
+
+        this.ghosts = new Proxy([], {
+            get: (target, prop) => {
+                const ghosts = this.ghostManager.getAllGhosts();
+                if (typeof prop === 'string' && !isNaN(Number(prop))) {
+                    return ghosts[Number(prop)];
+                }
+                return (ghosts as any)[prop];
+            }
+        }) as Ghost[];
+
         this.worldData = { starting_room: '', rooms: {} };
+        this.characters = [];
 
         this.repository = new WorldRepository();
         this.commands = new Map();
@@ -108,17 +149,7 @@ export class GameManager {
         const loadedWorld = this.repository.loadWorld();
         if (loadedWorld) {
             this.worldData = loadedWorld;
-            // Re-initialize rooms based on loaded world data
-            for (const [key, room] of Object.entries(loadedWorld.rooms)) {
-                const r = room as Room;
-                this.rooms[key] = {
-                    ...r,
-                    id: key,
-                    items: r.items || [], // Use items
-                    // coins is already in room data
-                    // locks is already in room data
-                };
-            }
+            this.roomManager.loadWorldData(loadedWorld);
             console.log("World loaded.");
         } else {
             console.error("No world.json found! Run with --generate first.");
@@ -130,15 +161,13 @@ export class GameManager {
     saveGame(): void {
         console.log("Saving game...");
         // Save World
-        const world: WorldData = {
-            starting_room: this.worldData.starting_room,
-            rooms: this.rooms
-        };
+        const world = this.roomManager.getWorldData();
         this.repository.saveWorld(world);
 
         // Save Players
         const playersToSave: Record<string, { roomId: string; inventory: Inventory; exploredRooms: string[] }> = {};
-        for (const [id, p] of this.players) {
+        const allPlayers = this.playerManager.getAllPlayers();
+        for (const p of allPlayers) {
             if (p.character) {
                 playersToSave[p.character.id] = {
                     roomId: p.roomId,
@@ -488,37 +517,37 @@ export class GameManager {
     }
 
     startGhostLoop(): void {
-        this.ghosts = CONFIG.GHOSTS.DEFAULT_SPAWNS.map(spawn => ({
-            ...spawn,
-            roomId: this.getRandomRoomId(),
-            combatants: new Set<string>()
-        }));
-
-        setInterval(() => {
-            this.moveGhosts();
-        }, CONFIG.GHOSTS.MOVE_INTERVAL_MS);
+        this.ghostManager.spawnInitialGhosts();
+        this.ghostManager.startMovementLoop(() => this.moveGhosts());
     }
 
     moveGhosts(): void {
-        for (const ghost of this.ghosts) {
-            const room = this.rooms[ghost.roomId];
+        const allGhosts = this.ghostManager.getAllGhosts();
+        for (const ghost of allGhosts) {
+            const room = this.roomManager.getRoom(ghost.roomId);
+            if (!room) continue;
+
             const exits = Object.keys(room.exits);
-            if (exits.length > 0) {
-                const dir = exits[Math.floor(Math.random() * exits.length)];
+            if (exits.length === 0) continue;
 
-                if (room.locks && room.locks[dir]) continue;
+            const dir = exits[Math.floor(Math.random() * exits.length)];
 
-                const nextRoomId = room.exits[dir];
-                this.broadcastToRoom(ghost.roomId, `${ghost.name} floats ${dir}.`);
-                ghost.roomId = nextRoomId;
-                this.broadcastToRoom(nextRoomId, `${ghost.name} floats in from the ${this.getOppositeDirection(dir)}.`);
-            }
+            // Skip locked doors
+            if (room.locks && room.locks[dir]) continue;
+
+            const nextRoomId = room.exits[dir];
+            this.broadcastToRoom(ghost.roomId, `${ghost.name} floats ${dir}.`);
+
+            this.ghostManager.moveGhost(ghost, exits, (direction: string) =>
+                this.roomManager.getExitRoomId(ghost.roomId, direction)
+            );
+
+            this.broadcastToRoom(nextRoomId, `${ghost.name} floats in from the ${this.getOppositeDirection(dir)}.`);
         }
     }
 
     getRandomRoomId(): string {
-        const ids = Object.keys(this.rooms);
-        return ids[Math.floor(Math.random() * ids.length)];
+        return this.roomManager.getRandomRoomId();
     }
 
     sendStats(socket: Socket): void {

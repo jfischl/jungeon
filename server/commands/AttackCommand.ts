@@ -191,18 +191,67 @@ export class AttackCommand implements Command {
     }
 
     private initiatePvPCombat(socket: Socket, attacker: any, defender: any, game: GameManager): void {
-        // Check newbie protection
-        if (defender.level < 3) {
-            socket.emit('message', `${defender.character.name} has newbie protection (under level 3).`);
+        // Check if they are actually in combat with each other
+        if (!attacker.inCombat || !defender.inCombat ||
+            attacker.combatTarget !== defender.character.name ||
+            defender.combatTarget !== attacker.character.name) {
+
+            socket.emit('message', `You must challenge ${defender.character.name} to a duel first! Use 'challenge <player>'.`);
             return;
         }
 
-        // Check safe zone
-        if (attacker.roomId === game.worldData.starting_room) {
-            socket.emit('message', "Combat is not allowed in the starting room.");
-            return;
+        // Attacker strikes
+        const damage = game.combatManager.calculateDamage(attacker, defender);
+
+        // Check defense
+        let actualDamage = damage;
+        if (defender.isDefending) {
+            actualDamage = Math.floor(damage / 2);
+            defender.isDefending = false;
+
+            const defenderSocket = Array.from(game.io.sockets.sockets.values()).find(s => s.id === defender.id);
+            if (defenderSocket) {
+                defenderSocket.emit('message', "Your defense reduces the damage!");
+            }
         }
 
-        socket.emit('message', `PvP combat is not yet fully implemented. Coming soon!`);
+        defender.hp -= actualDamage;
+        const isCrit = damage > (attacker.attack - defender.defense / 2 + 6);
+
+        // Notify attacker
+        socket.emit('message', `You attack ${defender.character.name} for ${actualDamage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`);
+        game.sendStats(socket);
+
+        // Notify defender
+        const defenderSocket = Array.from(game.io.sockets.sockets.values()).find(s => s.id === defender.id);
+        if (defenderSocket) {
+            defenderSocket.emit('message', `${attacker.character.name} attacks you for ${actualDamage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`);
+            defenderSocket.emit('message', `Your HP: ${defender.hp}/${defender.maxHp}`);
+            game.sendStats(defenderSocket);
+        }
+
+        // Notify room
+        game.broadcastToRoom(attacker.roomId, `${attacker.character.name} attacks ${defender.character.name}!`, socket.id);
+
+        // Check for death
+        if (defender.hp <= 0) {
+            game.broadcastToRoom(attacker.roomId, `💀 ${attacker.character.name} has defeated ${defender.character.name} in a duel!`, '');
+
+            // Handle death (rewards transfer handled in CombatManager)
+            game.combatManager.handleDeath(defender, attacker, game);
+
+            // End combat for attacker
+            attacker.inCombat = false;
+            attacker.combatTarget = null;
+            game.sendStats(socket);
+        } else {
+            // Turn passes (in a real turn-based system we'd enforce this, 
+            // but for now it's free-for-all turns like ghost combat)
+            if (defenderSocket) {
+                defenderSocket.emit('message', `It's your turn! Attack back!`);
+            }
+        }
+
+        game.saveGame();
     }
 }

@@ -17,6 +17,8 @@ import { CombatManager } from './CombatManager';
 import { FleeCommand } from './commands/FleeCommand';
 import { DefendCommand } from './commands/DefendCommand';
 import { HealCommand } from './commands/HealCommand';
+import { ChallengeCommand } from './commands/ChallengeCommand';
+import { AcceptCommand } from './commands/AcceptCommand';
 
 export class GameManager {
     io: Server;
@@ -36,6 +38,7 @@ export class GameManager {
         combatants: Set<string>; // Player IDs fighting this ghost
     }[];
     combatManager: CombatManager;
+    pendingChallenges: Map<string, { challengerId: string; targetId: string; timestamp: number }>;
 
     private repository: WorldRepository;
     private commands: Map<string, Command>;
@@ -51,6 +54,7 @@ export class GameManager {
         this.repository = new WorldRepository();
         this.commands = new Map();
         this.combatManager = new CombatManager(this);
+        this.pendingChallenges = new Map();
         this.registerCommands();
 
         this.loadGame();
@@ -92,6 +96,9 @@ export class GameManager {
         this.commands.set('block', new DefendCommand()); // Alias
         this.commands.set('heal', new HealCommand());
         this.commands.set('drink', new HealCommand()); // Alias
+        this.commands.set('challenge', new ChallengeCommand());
+        this.commands.set('duel', new ChallengeCommand()); // Alias
+        this.commands.set('accept', new AcceptCommand());
     }
 
     loadGame(): void {

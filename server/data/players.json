@@ -1,8 +1,8 @@
 {
   "warrior": {
-    "roomId": "room_0_0_119",
+    "roomId": "room_-2_1_437",
     "inventory": {
-      "coins": 60,
+      "coins": 120,
       "items": [
         {
           "id": "map_11",
@@ -18,18 +18,8 @@
       "room_0_-1_683",
       "room_1_-1_641",
       "room_1_-2_737",
-      "room_2_-2_278"
-    ]
-  },
-  "rogue": {
-    "roomId": "room_2_-2_278",
-    "inventory": {
-      "coins": 0,
-      "items": []
-    },
-    "exploredRooms": [
-      "room_0_0_119",
-      "room_2_-2_278"
+      "room_2_-2_278",
+      "room_-2_1_437"
     ]
   }
 }

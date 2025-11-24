@@ -1,0 +1,1676 @@
+{
+  "starting_room": "room_0_0_611",
+  "rooms": {
+    "room_0_0_611": {
+      "id": "room_0_0_611",
+      "name": "Vault 544",
+      "description": "A dark and spooky place at 0,0.",
+      "exits": {
+        "south": "room_0_1_982",
+        "west": "room_-1_0_490",
+        "north": "room_0_-1_514"
+      },
+      "x": 0,
+      "y": 0,
+      "coins": 3,
+      "items": [
+        {
+          "id": "key_2",
+          "name": "Silver Skeleton Key",
+          "description": "A delicate silver key etched with mysterious arcane runes."
+        }
+      ],
+      "locks": {}
+    },
+    "room_0_1_982": {
+      "id": "room_0_1_982",
+      "name": "Vault 688",
+      "description": "A dark and spooky place at 0,1.",
+      "exits": {
+        "north": "room_0_0_611",
+        "south": "room_0_2_698"
+      },
+      "x": 0,
+      "y": 1,
+      "coins": 3,
+      "items": [
+        {
+          "id": "key_1",
+          "name": "Rusted Iron Key",
+          "description": "An ancient iron key, heavy with age and covered in rust."
+        }
+      ],
+      "locks": {}
+    },
+    "room_0_2_698": {
+      "id": "room_0_2_698",
+      "name": "Workshop 612",
+      "description": "A dark and spooky place at 0,2.",
+      "exits": {
+        "north": "room_0_1_982",
+        "west": "room_-1_2_883"
+      },
+      "x": 0,
+      "y": 2,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_-1_2_883": {
+      "id": "room_-1_2_883",
+      "name": "Balcony 547",
+      "description": "A dark and spooky place at -1,2.",
+      "exits": {
+        "east": "room_0_2_698",
+        "north": "room_-1_1_639",
+        "west": "room_-2_2_213"
+      },
+      "x": -1,
+      "y": 2,
+      "coins": 2,
+      "items": [],
+      "locks": {}
+    },
+    "room_-1_1_639": {
+      "id": "room_-1_1_639",
+      "name": "Sanctuary 330",
+      "description": "A dark and spooky place at -1,1.",
+      "exits": {
+        "south": "room_-1_2_883",
+        "north": "room_-1_0_490",
+        "west": "room_-2_1_717"
+      },
+      "x": -1,
+      "y": 1,
+      "coins": 2,
+      "items": [],
+      "locks": {
+        "north": "key_0"
+      }
+    },
+    "room_-1_0_490": {
+      "id": "room_-1_0_490",
+      "name": "Balcony 629",
+      "description": "A dark and spooky place at -1,0.",
+      "exits": {
+        "south": "room_-1_1_639",
+        "north": "room_-1_-1_232",
+        "east": "room_0_0_611"
+      },
+      "x": -1,
+      "y": 0,
+      "coins": 7,
+      "items": [],
+      "locks": {
+        "south": "key_0"
+      }
+    },
+    "room_-1_-1_232": {
+      "id": "room_-1_-1_232",
+      "name": "Dungeon Cell 480",
+      "description": "A dark and spooky place at -1,-1.",
+      "exits": {
+        "south": "room_-1_0_490",
+        "north": "room_-1_-2_878"
+      },
+      "x": -1,
+      "y": -1,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_-1_-2_878": {
+      "id": "room_-1_-2_878",
+      "name": "Bedroom 767",
+      "description": "A dark and spooky place at -1,-2.",
+      "exits": {
+        "south": "room_-1_-1_232",
+        "west": "room_-2_-2_481"
+      },
+      "x": -1,
+      "y": -2,
+      "coins": 5,
+      "items": [
+        {
+          "id": "potion_30",
+          "name": "Red Potion",
+          "description": "Smells like strawberries."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-2_-2_481": {
+      "id": "room_-2_-2_481",
+      "name": "Kitchen 65",
+      "description": "A dark and spooky place at -2,-2.",
+      "exits": {
+        "east": "room_-1_-2_878",
+        "north": "room_-2_-3_932"
+      },
+      "x": -2,
+      "y": -2,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_-2_-3_932": {
+      "id": "room_-2_-3_932",
+      "name": "Treasury 924",
+      "description": "A dark and spooky place at -2,-3.",
+      "exits": {
+        "south": "room_-2_-2_481",
+        "north": "room_-2_-4_748"
+      },
+      "x": -2,
+      "y": -3,
+      "coins": 5,
+      "items": [
+        {
+          "id": "torch_2",
+          "name": "Unlit Torch",
+          "description": "Need a light?"
+        }
+      ],
+      "locks": {}
+    },
+    "room_-2_-4_748": {
+      "id": "room_-2_-4_748",
+      "name": "Dungeon Cell 816",
+      "description": "A dark and spooky place at -2,-4.",
+      "exits": {
+        "south": "room_-2_-3_932",
+        "west": "room_-3_-4_608"
+      },
+      "x": -2,
+      "y": -4,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_-3_-4_608": {
+      "id": "room_-3_-4_608",
+      "name": "Dusty Library 778",
+      "description": "A dark and spooky place at -3,-4.",
+      "exits": {
+        "east": "room_-2_-4_748",
+        "south": "room_-3_-3_570"
+      },
+      "x": -3,
+      "y": -4,
+      "coins": 4,
+      "items": [
+        {
+          "id": "map_28",
+          "name": "Tattered Map",
+          "description": "Shows a place you aren't in."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-3_-3_570": {
+      "id": "room_-3_-3_570",
+      "name": "Workshop 612",
+      "description": "A dark and spooky place at -3,-3.",
+      "exits": {
+        "north": "room_-3_-4_608",
+        "south": "room_-3_-2_612"
+      },
+      "x": -3,
+      "y": -3,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_-3_-2_612": {
+      "id": "room_-3_-2_612",
+      "name": "Dungeon Cell 102",
+      "description": "A dark and spooky place at -3,-2.",
+      "exits": {
+        "north": "room_-3_-3_570",
+        "south": "room_-3_-1_730"
+      },
+      "x": -3,
+      "y": -2,
+      "coins": 2,
+      "items": [],
+      "locks": {}
+    },
+    "room_-3_-1_730": {
+      "id": "room_-3_-1_730",
+      "name": "Sanctuary 349",
+      "description": "A dark and spooky place at -3,-1.",
+      "exits": {
+        "north": "room_-3_-2_612",
+        "south": "room_-3_0_391"
+      },
+      "x": -3,
+      "y": -1,
+      "coins": 4,
+      "items": [
+        {
+          "id": "sword_15",
+          "name": "Rusty Sword",
+          "description": "Better than nothing."
+        },
+        {
+          "id": "ring_27",
+          "name": "Gold Ring",
+          "description": "My precious."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-3_0_391": {
+      "id": "room_-3_0_391",
+      "name": "Chapel 943",
+      "description": "A dark and spooky place at -3,0.",
+      "exits": {
+        "north": "room_-3_-1_730",
+        "west": "room_-4_0_813",
+        "south": "room_-3_1_304"
+      },
+      "x": -3,
+      "y": 0,
+      "coins": 6,
+      "items": [],
+      "locks": {
+        "west": "key_5"
+      }
+    },
+    "room_-4_0_813": {
+      "id": "room_-4_0_813",
+      "name": "Armory 106",
+      "description": "A dark and spooky place at -4,0.",
+      "exits": {
+        "east": "room_-3_0_391"
+      },
+      "x": -4,
+      "y": 0,
+      "coins": 3,
+      "items": [],
+      "locks": {
+        "east": "key_5"
+      }
+    },
+    "room_-3_1_304": {
+      "id": "room_-3_1_304",
+      "name": "Bedroom 645",
+      "description": "A dark and spooky place at -3,1.",
+      "exits": {
+        "north": "room_-3_0_391",
+        "east": "room_-2_1_717"
+      },
+      "x": -3,
+      "y": 1,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_-2_1_717": {
+      "id": "room_-2_1_717",
+      "name": "Bedroom 628",
+      "description": "A dark and spooky place at -2,1.",
+      "exits": {
+        "west": "room_-3_1_304",
+        "east": "room_-1_1_639",
+        "south": "room_-2_2_213"
+      },
+      "x": -2,
+      "y": 1,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_-2_2_213": {
+      "id": "room_-2_2_213",
+      "name": "Stable 981",
+      "description": "A dark and spooky place at -2,2.",
+      "exits": {
+        "north": "room_-2_1_717",
+        "east": "room_-1_2_883",
+        "south": "room_-2_3_129",
+        "west": "room_-3_2_215"
+      },
+      "x": -2,
+      "y": 2,
+      "coins": 6,
+      "items": [
+        {
+          "id": "scroll_10",
+          "name": "Ancient Scroll",
+          "description": "Unreadable runes."
+        }
+      ],
+      "locks": {
+        "west": "key_4"
+      }
+    },
+    "room_-2_3_129": {
+      "id": "room_-2_3_129",
+      "name": "Bedroom 8",
+      "description": "A dark and spooky place at -2,3.",
+      "exits": {
+        "north": "room_-2_2_213",
+        "south": "room_-2_4_807"
+      },
+      "x": -2,
+      "y": 3,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_-2_4_807": {
+      "id": "room_-2_4_807",
+      "name": "Attic 132",
+      "description": "A dark and spooky place at -2,4.",
+      "exits": {
+        "north": "room_-2_3_129",
+        "south": "room_-2_5_221",
+        "east": "room_-1_4_726"
+      },
+      "x": -2,
+      "y": 4,
+      "coins": 1,
+      "items": [],
+      "locks": {}
+    },
+    "room_-2_5_221": {
+      "id": "room_-2_5_221",
+      "name": "Chapel 859",
+      "description": "A dark and spooky place at -2,5.",
+      "exits": {
+        "north": "room_-2_4_807",
+        "south": "room_-2_6_139",
+        "west": "room_-3_5_452"
+      },
+      "x": -2,
+      "y": 5,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_-2_6_139": {
+      "id": "room_-2_6_139",
+      "name": "Hallway 79",
+      "description": "A dark and spooky place at -2,6.",
+      "exits": {
+        "north": "room_-2_5_221",
+        "east": "room_-1_6_73"
+      },
+      "x": -2,
+      "y": 6,
+      "coins": 3,
+      "items": [
+        {
+          "id": "ring_13",
+          "name": "Gold Ring",
+          "description": "My precious."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-1_6_73": {
+      "id": "room_-1_6_73",
+      "name": "Study 438",
+      "description": "A dark and spooky place at -1,6.",
+      "exits": {
+        "west": "room_-2_6_139",
+        "north": "room_-1_5_287"
+      },
+      "x": -1,
+      "y": 6,
+      "coins": 4,
+      "items": [
+        {
+          "id": "potion_7",
+          "name": "Red Potion",
+          "description": "Smells like strawberries."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-1_5_287": {
+      "id": "room_-1_5_287",
+      "name": "Observatory 794",
+      "description": "A dark and spooky place at -1,5.",
+      "exits": {
+        "south": "room_-1_6_73",
+        "north": "room_-1_4_726"
+      },
+      "x": -1,
+      "y": 5,
+      "coins": 7,
+      "items": [
+        {
+          "id": "scroll_29",
+          "name": "Ancient Scroll",
+          "description": "Unreadable runes."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-1_4_726": {
+      "id": "room_-1_4_726",
+      "name": "Laboratory 609",
+      "description": "A dark and spooky place at -1,4.",
+      "exits": {
+        "south": "room_-1_5_287",
+        "west": "room_-2_4_807"
+      },
+      "x": -1,
+      "y": 4,
+      "coins": 5,
+      "items": [
+        {
+          "id": "shield_8",
+          "name": "Wooden Shield",
+          "description": "Splintery but sturdy."
+        },
+        {
+          "id": "key_0",
+          "name": "Ornate Bronze Key",
+          "description": "A heavy bronze key engraved with twisted vines and thorns."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-3_5_452": {
+      "id": "room_-3_5_452",
+      "name": "Crypt 157",
+      "description": "A dark and spooky place at -3,5.",
+      "exits": {
+        "east": "room_-2_5_221",
+        "south": "room_-3_6_23",
+        "north": "room_-3_4_490"
+      },
+      "x": -3,
+      "y": 5,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_-3_6_23": {
+      "id": "room_-3_6_23",
+      "name": "Damp Cave 949",
+      "description": "A dark and spooky place at -3,6.",
+      "exits": {
+        "north": "room_-3_5_452"
+      },
+      "x": -3,
+      "y": 6,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_-3_4_490": {
+      "id": "room_-3_4_490",
+      "name": "Workshop 15",
+      "description": "A dark and spooky place at -3,4.",
+      "exits": {
+        "south": "room_-3_5_452",
+        "north": "room_-3_3_752"
+      },
+      "x": -3,
+      "y": 4,
+      "coins": 5,
+      "items": [
+        {
+          "id": "key_3",
+          "name": "Copper Dungeon Key",
+          "description": "A tarnished copper key stained with green verdigris."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-3_3_752": {
+      "id": "room_-3_3_752",
+      "name": "Workshop 690",
+      "description": "A dark and spooky place at -3,3.",
+      "exits": {
+        "south": "room_-3_4_490",
+        "north": "room_-3_2_215"
+      },
+      "x": -3,
+      "y": 3,
+      "coins": 5,
+      "items": [
+        {
+          "id": "shield_5",
+          "name": "Wooden Shield",
+          "description": "Splintery but sturdy."
+        }
+      ],
+      "locks": {}
+    },
+    "room_-3_2_215": {
+      "id": "room_-3_2_215",
+      "name": "Gallery 879",
+      "description": "A dark and spooky place at -3,2.",
+      "exits": {
+        "south": "room_-3_3_752",
+        "east": "room_-2_2_213"
+      },
+      "x": -3,
+      "y": 2,
+      "coins": 4,
+      "items": [],
+      "locks": {
+        "east": "key_4"
+      }
+    },
+    "room_0_-1_514": {
+      "id": "room_0_-1_514",
+      "name": "Workshop 668",
+      "description": "A dark and spooky place at 0,-1.",
+      "exits": {
+        "south": "room_0_0_611",
+        "east": "room_1_-1_806"
+      },
+      "x": 0,
+      "y": -1,
+      "coins": 4,
+      "items": [
+        {
+          "id": "torch_23",
+          "name": "Unlit Torch",
+          "description": "Need a light?"
+        }
+      ],
+      "locks": {}
+    },
+    "room_1_-1_806": {
+      "id": "room_1_-1_806",
+      "name": "Gallery 888",
+      "description": "A dark and spooky place at 1,-1.",
+      "exits": {
+        "west": "room_0_-1_514",
+        "north": "room_1_-2_521"
+      },
+      "x": 1,
+      "y": -1,
+      "coins": 7,
+      "items": [],
+      "locks": {}
+    },
+    "room_1_-2_521": {
+      "id": "room_1_-2_521",
+      "name": "Workshop 286",
+      "description": "A dark and spooky place at 1,-2.",
+      "exits": {
+        "south": "room_1_-1_806",
+        "north": "room_1_-3_242",
+        "east": "room_2_-2_847"
+      },
+      "x": 1,
+      "y": -2,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_1_-3_242": {
+      "id": "room_1_-3_242",
+      "name": "Stable 621",
+      "description": "A dark and spooky place at 1,-3.",
+      "exits": {
+        "south": "room_1_-2_521"
+      },
+      "x": 1,
+      "y": -3,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_2_-2_847": {
+      "id": "room_2_-2_847",
+      "name": "Corridor 353",
+      "description": "A dark and spooky place at 2,-2.",
+      "exits": {
+        "west": "room_1_-2_521",
+        "south": "room_2_-1_812",
+        "north": "room_2_-3_99"
+      },
+      "x": 2,
+      "y": -2,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_2_-1_812": {
+      "id": "room_2_-1_812",
+      "name": "Chapel 789",
+      "description": "A dark and spooky place at 2,-1.",
+      "exits": {
+        "north": "room_2_-2_847",
+        "east": "room_3_-1_260"
+      },
+      "x": 2,
+      "y": -1,
+      "coins": 4,
+      "items": [
+        {
+          "id": "potion_32",
+          "name": "Red Potion",
+          "description": "Smells like strawberries."
+        }
+      ],
+      "locks": {}
+    },
+    "room_3_-1_260": {
+      "id": "room_3_-1_260",
+      "name": "Kitchen 916",
+      "description": "A dark and spooky place at 3,-1.",
+      "exits": {
+        "west": "room_2_-1_812",
+        "north": "room_3_-2_105",
+        "east": "room_4_-1_5"
+      },
+      "x": 3,
+      "y": -1,
+      "coins": 4,
+      "items": [
+        {
+          "id": "torch_22",
+          "name": "Unlit Torch",
+          "description": "Need a light?"
+        }
+      ],
+      "locks": {}
+    },
+    "room_3_-2_105": {
+      "id": "room_3_-2_105",
+      "name": "Workshop 664",
+      "description": "A dark and spooky place at 3,-2.",
+      "exits": {
+        "south": "room_3_-1_260",
+        "east": "room_4_-2_282"
+      },
+      "x": 3,
+      "y": -2,
+      "coins": 5,
+      "items": [
+        {
+          "id": "map_21",
+          "name": "Tattered Map",
+          "description": "Shows a place you aren't in."
+        },
+        {
+          "id": "ring_26",
+          "name": "Gold Ring",
+          "description": "My precious."
+        }
+      ],
+      "locks": {}
+    },
+    "room_4_-1_5": {
+      "id": "room_4_-1_5",
+      "name": "Garden 19",
+      "description": "A dark and spooky place at 4,-1.",
+      "exits": {
+        "west": "room_3_-1_260"
+      },
+      "x": 4,
+      "y": -1,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_2_-3_99": {
+      "id": "room_2_-3_99",
+      "name": "Guard Room 682",
+      "description": "A dark and spooky place at 2,-3.",
+      "exits": {
+        "south": "room_2_-2_847",
+        "east": "room_3_-3_263"
+      },
+      "x": 2,
+      "y": -3,
+      "coins": 3,
+      "items": [],
+      "locks": {}
+    },
+    "room_3_-3_263": {
+      "id": "room_3_-3_263",
+      "name": "Bedroom 377",
+      "description": "A dark and spooky place at 3,-3.",
+      "exits": {
+        "west": "room_2_-3_99",
+        "east": "room_4_-3_908"
+      },
+      "x": 3,
+      "y": -3,
+      "coins": 2,
+      "items": [],
+      "locks": {}
+    },
+    "room_4_-3_908": {
+      "id": "room_4_-3_908",
+      "name": "Gallery 178",
+      "description": "A dark and spooky place at 4,-3.",
+      "exits": {
+        "west": "room_3_-3_263",
+        "east": "room_5_-3_667"
+      },
+      "x": 4,
+      "y": -3,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_5_-3_667": {
+      "id": "room_5_-3_667",
+      "name": "Chapel 252",
+      "description": "A dark and spooky place at 5,-3.",
+      "exits": {
+        "west": "room_4_-3_908",
+        "south": "room_5_-2_428",
+        "east": "room_6_-3_732"
+      },
+      "x": 5,
+      "y": -3,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_5_-2_428": {
+      "id": "room_5_-2_428",
+      "name": "Crypt 820",
+      "description": "A dark and spooky place at 5,-2.",
+      "exits": {
+        "north": "room_5_-3_667",
+        "west": "room_4_-2_282",
+        "east": "room_6_-2_348",
+        "south": "room_5_-1_100"
+      },
+      "x": 5,
+      "y": -2,
+      "coins": 3,
+      "items": [],
+      "locks": {}
+    },
+    "room_4_-2_282": {
+      "id": "room_4_-2_282",
+      "name": "Guard Room 746",
+      "description": "A dark and spooky place at 4,-2.",
+      "exits": {
+        "east": "room_5_-2_428",
+        "west": "room_3_-2_105"
+      },
+      "x": 4,
+      "y": -2,
+      "coins": 3,
+      "items": [
+        {
+          "id": "rope_17",
+          "name": "Coil of Rope",
+          "description": "Always useful."
+        }
+      ],
+      "locks": {}
+    },
+    "room_6_-2_348": {
+      "id": "room_6_-2_348",
+      "name": "Dusty Library 554",
+      "description": "A dark and spooky place at 6,-2.",
+      "exits": {
+        "west": "room_5_-2_428",
+        "east": "room_7_-2_31",
+        "north": "room_6_-3_732"
+      },
+      "x": 6,
+      "y": -2,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_-2_31": {
+      "id": "room_7_-2_31",
+      "name": "Throne Room 568",
+      "description": "A dark and spooky place at 7,-2.",
+      "exits": {
+        "west": "room_6_-2_348",
+        "south": "room_7_-1_708",
+        "east": "room_8_-2_305"
+      },
+      "x": 7,
+      "y": -2,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_-1_708": {
+      "id": "room_7_-1_708",
+      "name": "Barracks 780",
+      "description": "A dark and spooky place at 7,-1.",
+      "exits": {
+        "north": "room_7_-2_31",
+        "west": "room_6_-1_277",
+        "south": "room_7_0_149"
+      },
+      "x": 7,
+      "y": -1,
+      "coins": 3,
+      "items": [
+        {
+          "id": "gem_0",
+          "name": "Blue Gem",
+          "description": "Sparkles in the dark."
+        }
+      ],
+      "locks": {}
+    },
+    "room_8_-2_305": {
+      "id": "room_8_-2_305",
+      "name": "Sanctuary 418",
+      "description": "A dark and spooky place at 8,-2.",
+      "exits": {
+        "west": "room_7_-2_31",
+        "east": "room_9_-2_880",
+        "south": "room_8_-1_255",
+        "north": "room_8_-3_798"
+      },
+      "x": 8,
+      "y": -2,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_9_-2_880": {
+      "id": "room_9_-2_880",
+      "name": "Garden 444",
+      "description": "A dark and spooky place at 9,-2.",
+      "exits": {
+        "west": "room_8_-2_305",
+        "south": "room_9_-1_865"
+      },
+      "x": 9,
+      "y": -2,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_8_-1_255": {
+      "id": "room_8_-1_255",
+      "name": "Attic 509",
+      "description": "A dark and spooky place at 8,-1.",
+      "exits": {
+        "north": "room_8_-2_305",
+        "south": "room_8_0_178"
+      },
+      "x": 8,
+      "y": -1,
+      "coins": 7,
+      "items": [
+        {
+          "id": "shield_25",
+          "name": "Wooden Shield",
+          "description": "Splintery but sturdy."
+        }
+      ],
+      "locks": {}
+    },
+    "room_8_0_178": {
+      "id": "room_8_0_178",
+      "name": "Workshop 97",
+      "description": "A dark and spooky place at 8,0.",
+      "exits": {
+        "north": "room_8_-1_255",
+        "south": "room_8_1_349",
+        "east": "room_9_0_192"
+      },
+      "x": 8,
+      "y": 0,
+      "coins": 5,
+      "items": [],
+      "locks": {
+        "east": "key_1"
+      }
+    },
+    "room_8_1_349": {
+      "id": "room_8_1_349",
+      "name": "Gallery 464",
+      "description": "A dark and spooky place at 8,1.",
+      "exits": {
+        "north": "room_8_0_178",
+        "west": "room_7_1_554",
+        "south": "room_8_2_853"
+      },
+      "x": 8,
+      "y": 1,
+      "coins": 3,
+      "items": [],
+      "locks": {}
+    },
+    "room_9_0_192": {
+      "id": "room_9_0_192",
+      "name": "Sanctuary 582",
+      "description": "A dark and spooky place at 9,0.",
+      "exits": {
+        "west": "room_8_0_178",
+        "north": "room_9_-1_865"
+      },
+      "x": 9,
+      "y": 0,
+      "coins": 3,
+      "items": [],
+      "locks": {
+        "west": "key_1",
+        "north": "key_2"
+      }
+    },
+    "room_9_-1_865": {
+      "id": "room_9_-1_865",
+      "name": "Dungeon Cell 501",
+      "description": "A dark and spooky place at 9,-1.",
+      "exits": {
+        "south": "room_9_0_192",
+        "north": "room_9_-2_880"
+      },
+      "x": 9,
+      "y": -1,
+      "coins": 3,
+      "items": [],
+      "locks": {
+        "south": "key_2"
+      }
+    },
+    "room_8_-3_798": {
+      "id": "room_8_-3_798",
+      "name": "Garden 747",
+      "description": "A dark and spooky place at 8,-3.",
+      "exits": {
+        "south": "room_8_-2_305",
+        "west": "room_7_-3_273"
+      },
+      "x": 8,
+      "y": -3,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_-3_273": {
+      "id": "room_7_-3_273",
+      "name": "Crypt 111",
+      "description": "A dark and spooky place at 7,-3.",
+      "exits": {
+        "east": "room_8_-3_798"
+      },
+      "x": 7,
+      "y": -3,
+      "coins": 3,
+      "items": [
+        {
+          "id": "key_5",
+          "name": "Golden Chamber Key",
+          "description": "An ornate golden key with intricate filigree work."
+        }
+      ],
+      "locks": {}
+    },
+    "room_6_-3_732": {
+      "id": "room_6_-3_732",
+      "name": "Throne Room 909",
+      "description": "A dark and spooky place at 6,-3.",
+      "exits": {
+        "south": "room_6_-2_348",
+        "west": "room_5_-3_667"
+      },
+      "x": 6,
+      "y": -3,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_5_-1_100": {
+      "id": "room_5_-1_100",
+      "name": "Vault 289",
+      "description": "A dark and spooky place at 5,-1.",
+      "exits": {
+        "north": "room_5_-2_428",
+        "east": "room_6_-1_277"
+      },
+      "x": 5,
+      "y": -1,
+      "coins": 4,
+      "items": [
+        {
+          "id": "shield_18",
+          "name": "Wooden Shield",
+          "description": "Splintery but sturdy."
+        }
+      ],
+      "locks": {}
+    },
+    "room_6_-1_277": {
+      "id": "room_6_-1_277",
+      "name": "Balcony 800",
+      "description": "A dark and spooky place at 6,-1.",
+      "exits": {
+        "west": "room_5_-1_100",
+        "east": "room_7_-1_708"
+      },
+      "x": 6,
+      "y": -1,
+      "coins": 8,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_0_149": {
+      "id": "room_7_0_149",
+      "name": "Observatory 744",
+      "description": "A dark and spooky place at 7,0.",
+      "exits": {
+        "north": "room_7_-1_708",
+        "west": "room_6_0_661",
+        "south": "room_7_1_554"
+      },
+      "x": 7,
+      "y": 0,
+      "coins": 6,
+      "items": [
+        {
+          "id": "map_1",
+          "name": "Tattered Map",
+          "description": "Shows a place you aren't in."
+        },
+        {
+          "id": "bone_4",
+          "name": "Human Bone",
+          "description": "Spooky."
+        },
+        {
+          "id": "scroll_16",
+          "name": "Ancient Scroll",
+          "description": "Unreadable runes."
+        }
+      ],
+      "locks": {}
+    },
+    "room_6_0_661": {
+      "id": "room_6_0_661",
+      "name": "Gallery 791",
+      "description": "A dark and spooky place at 6,0.",
+      "exits": {
+        "east": "room_7_0_149"
+      },
+      "x": 6,
+      "y": 0,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_1_554": {
+      "id": "room_7_1_554",
+      "name": "Stable 216",
+      "description": "A dark and spooky place at 7,1.",
+      "exits": {
+        "north": "room_7_0_149",
+        "west": "room_6_1_570",
+        "east": "room_8_1_349"
+      },
+      "x": 7,
+      "y": 1,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_6_1_570": {
+      "id": "room_6_1_570",
+      "name": "Sanctuary 474",
+      "description": "A dark and spooky place at 6,1.",
+      "exits": {
+        "east": "room_7_1_554"
+      },
+      "x": 6,
+      "y": 1,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_8_2_853": {
+      "id": "room_8_2_853",
+      "name": "Wine Cellar 15",
+      "description": "A dark and spooky place at 8,2.",
+      "exits": {
+        "north": "room_8_1_349",
+        "south": "room_8_3_101"
+      },
+      "x": 8,
+      "y": 2,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_8_3_101": {
+      "id": "room_8_3_101",
+      "name": "Armory 30",
+      "description": "A dark and spooky place at 8,3.",
+      "exits": {
+        "north": "room_8_2_853",
+        "west": "room_7_3_958",
+        "south": "room_8_4_710"
+      },
+      "x": 8,
+      "y": 3,
+      "coins": 7,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_3_958": {
+      "id": "room_7_3_958",
+      "name": "Sanctuary 729",
+      "description": "A dark and spooky place at 7,3.",
+      "exits": {
+        "east": "room_8_3_101"
+      },
+      "x": 7,
+      "y": 3,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_8_4_710": {
+      "id": "room_8_4_710",
+      "name": "Gallery 635",
+      "description": "A dark and spooky place at 8,4.",
+      "exits": {
+        "north": "room_8_3_101",
+        "west": "room_7_4_701"
+      },
+      "x": 8,
+      "y": 4,
+      "coins": 4,
+      "items": [
+        {
+          "id": "gem_12",
+          "name": "Blue Gem",
+          "description": "Sparkles in the dark."
+        }
+      ],
+      "locks": {}
+    },
+    "room_7_4_701": {
+      "id": "room_7_4_701",
+      "name": "Sanctuary 238",
+      "description": "A dark and spooky place at 7,4.",
+      "exits": {
+        "east": "room_8_4_710",
+        "south": "room_7_5_143"
+      },
+      "x": 7,
+      "y": 4,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_5_143": {
+      "id": "room_7_5_143",
+      "name": "Chapel 59",
+      "description": "A dark and spooky place at 7,5.",
+      "exits": {
+        "north": "room_7_4_701",
+        "south": "room_7_6_992"
+      },
+      "x": 7,
+      "y": 5,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_6_992": {
+      "id": "room_7_6_992",
+      "name": "Damp Cave 962",
+      "description": "A dark and spooky place at 7,6.",
+      "exits": {
+        "north": "room_7_5_143",
+        "south": "room_7_7_506"
+      },
+      "x": 7,
+      "y": 6,
+      "coins": 6,
+      "items": [
+        {
+          "id": "potion_14",
+          "name": "Red Potion",
+          "description": "Smells like strawberries."
+        }
+      ],
+      "locks": {}
+    },
+    "room_7_7_506": {
+      "id": "room_7_7_506",
+      "name": "Armory 223",
+      "description": "A dark and spooky place at 7,7.",
+      "exits": {
+        "north": "room_7_6_992",
+        "west": "room_6_7_632"
+      },
+      "x": 7,
+      "y": 7,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_6_7_632": {
+      "id": "room_6_7_632",
+      "name": "Bedroom 534",
+      "description": "A dark and spooky place at 6,7.",
+      "exits": {
+        "east": "room_7_7_506",
+        "south": "room_6_8_728",
+        "west": "room_5_7_380"
+      },
+      "x": 6,
+      "y": 7,
+      "coins": 6,
+      "items": [
+        {
+          "id": "key_4",
+          "name": "Blackened Steel Key",
+          "description": "A steel key scorched black, as if touched by flame."
+        }
+      ],
+      "locks": {}
+    },
+    "room_6_8_728": {
+      "id": "room_6_8_728",
+      "name": "Observatory 332",
+      "description": "A dark and spooky place at 6,8.",
+      "exits": {
+        "north": "room_6_7_632",
+        "south": "room_6_9_471",
+        "east": "room_7_8_383"
+      },
+      "x": 6,
+      "y": 8,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_6_9_471": {
+      "id": "room_6_9_471",
+      "name": "Attic 469",
+      "description": "A dark and spooky place at 6,9.",
+      "exits": {
+        "north": "room_6_8_728"
+      },
+      "x": 6,
+      "y": 9,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_8_383": {
+      "id": "room_7_8_383",
+      "name": "Dungeon Cell 34",
+      "description": "A dark and spooky place at 7,8.",
+      "exits": {
+        "west": "room_6_8_728",
+        "east": "room_8_8_277",
+        "south": "room_7_9_802"
+      },
+      "x": 7,
+      "y": 8,
+      "coins": 3,
+      "items": [],
+      "locks": {}
+    },
+    "room_8_8_277": {
+      "id": "room_8_8_277",
+      "name": "Balcony 407",
+      "description": "A dark and spooky place at 8,8.",
+      "exits": {
+        "west": "room_7_8_383"
+      },
+      "x": 8,
+      "y": 8,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_9_802": {
+      "id": "room_7_9_802",
+      "name": "Attic 741",
+      "description": "A dark and spooky place at 7,9.",
+      "exits": {
+        "north": "room_7_8_383",
+        "east": "room_8_9_615"
+      },
+      "x": 7,
+      "y": 9,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_8_9_615": {
+      "id": "room_8_9_615",
+      "name": "Sanctuary 441",
+      "description": "A dark and spooky place at 8,9.",
+      "exits": {
+        "west": "room_7_9_802",
+        "south": "room_8_10_132",
+        "east": "room_9_9_889"
+      },
+      "x": 8,
+      "y": 9,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_8_10_132": {
+      "id": "room_8_10_132",
+      "name": "Sewer 704",
+      "description": "A dark and spooky place at 8,10.",
+      "exits": {
+        "north": "room_8_9_615",
+        "west": "room_7_10_120"
+      },
+      "x": 8,
+      "y": 10,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_7_10_120": {
+      "id": "room_7_10_120",
+      "name": "Antechamber 515",
+      "description": "A dark and spooky place at 7,10.",
+      "exits": {
+        "east": "room_8_10_132",
+        "west": "room_6_10_790",
+        "south": "room_7_11_364"
+      },
+      "x": 7,
+      "y": 10,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_9_9_889": {
+      "id": "room_9_9_889",
+      "name": "Throne Room 695",
+      "description": "A dark and spooky place at 9,9.",
+      "exits": {
+        "west": "room_8_9_615"
+      },
+      "x": 9,
+      "y": 9,
+      "coins": 7,
+      "items": [],
+      "locks": {}
+    },
+    "room_6_10_790": {
+      "id": "room_6_10_790",
+      "name": "Attic 613",
+      "description": "A dark and spooky place at 6,10.",
+      "exits": {
+        "east": "room_7_10_120",
+        "south": "room_6_11_247"
+      },
+      "x": 6,
+      "y": 10,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_6_11_247": {
+      "id": "room_6_11_247",
+      "name": "Gallery 195",
+      "description": "A dark and spooky place at 6,11.",
+      "exits": {
+        "north": "room_6_10_790",
+        "east": "room_7_11_364"
+      },
+      "x": 6,
+      "y": 11,
+      "coins": 4,
+      "items": [
+        {
+          "id": "ring_3",
+          "name": "Gold Ring",
+          "description": "My precious."
+        },
+        {
+          "id": "scroll_11",
+          "name": "Ancient Scroll",
+          "description": "Unreadable runes."
+        },
+        {
+          "id": "shield_24",
+          "name": "Wooden Shield",
+          "description": "Splintery but sturdy."
+        }
+      ],
+      "locks": {
+        "east": "key_3"
+      }
+    },
+    "room_7_11_364": {
+      "id": "room_7_11_364",
+      "name": "Gallery 92",
+      "description": "A dark and spooky place at 7,11.",
+      "exits": {
+        "west": "room_6_11_247",
+        "north": "room_7_10_120"
+      },
+      "x": 7,
+      "y": 11,
+      "coins": 4,
+      "items": [
+        {
+          "id": "rope_6",
+          "name": "Coil of Rope",
+          "description": "Always useful."
+        },
+        {
+          "id": "potion_9",
+          "name": "Red Potion",
+          "description": "Smells like strawberries."
+        }
+      ],
+      "locks": {
+        "west": "key_3"
+      }
+    },
+    "room_5_7_380": {
+      "id": "room_5_7_380",
+      "name": "Throne Room 666",
+      "description": "A dark and spooky place at 5,7.",
+      "exits": {
+        "east": "room_6_7_632",
+        "west": "room_4_7_203"
+      },
+      "x": 5,
+      "y": 7,
+      "coins": 4,
+      "items": [
+        {
+          "id": "ring_31",
+          "name": "Gold Ring",
+          "description": "My precious."
+        }
+      ],
+      "locks": {}
+    },
+    "room_4_7_203": {
+      "id": "room_4_7_203",
+      "name": "Antechamber 875",
+      "description": "A dark and spooky place at 4,7.",
+      "exits": {
+        "east": "room_5_7_380",
+        "south": "room_4_8_511",
+        "north": "room_4_6_632"
+      },
+      "x": 4,
+      "y": 7,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_4_8_511": {
+      "id": "room_4_8_511",
+      "name": "Corridor 213",
+      "description": "A dark and spooky place at 4,8.",
+      "exits": {
+        "north": "room_4_7_203"
+      },
+      "x": 4,
+      "y": 8,
+      "coins": 4,
+      "items": [],
+      "locks": {}
+    },
+    "room_4_6_632": {
+      "id": "room_4_6_632",
+      "name": "Armory 472",
+      "description": "A dark and spooky place at 4,6.",
+      "exits": {
+        "south": "room_4_7_203",
+        "north": "room_4_5_607",
+        "west": "room_3_6_787"
+      },
+      "x": 4,
+      "y": 6,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_4_5_607": {
+      "id": "room_4_5_607",
+      "name": "Sewer 370",
+      "description": "A dark and spooky place at 4,5.",
+      "exits": {
+        "south": "room_4_6_632",
+        "east": "room_5_5_148",
+        "west": "room_3_5_895"
+      },
+      "x": 4,
+      "y": 5,
+      "coins": 3,
+      "items": [],
+      "locks": {}
+    },
+    "room_5_5_148": {
+      "id": "room_5_5_148",
+      "name": "Attic 295",
+      "description": "A dark and spooky place at 5,5.",
+      "exits": {
+        "west": "room_4_5_607",
+        "north": "room_5_4_220",
+        "south": "room_5_6_397"
+      },
+      "x": 5,
+      "y": 5,
+      "coins": 6,
+      "items": [],
+      "locks": {}
+    },
+    "room_5_4_220": {
+      "id": "room_5_4_220",
+      "name": "Sanctuary 283",
+      "description": "A dark and spooky place at 5,4.",
+      "exits": {
+        "south": "room_5_5_148",
+        "west": "room_4_4_577"
+      },
+      "x": 5,
+      "y": 4,
+      "coins": 3,
+      "items": [],
+      "locks": {}
+    },
+    "room_4_4_577": {
+      "id": "room_4_4_577",
+      "name": "Bedroom 695",
+      "description": "A dark and spooky place at 4,4.",
+      "exits": {
+        "east": "room_5_4_220"
+      },
+      "x": 4,
+      "y": 4,
+      "coins": 6,
+      "items": [
+        {
+          "id": "ring_20",
+          "name": "Gold Ring",
+          "description": "My precious."
+        }
+      ],
+      "locks": {}
+    },
+    "room_5_6_397": {
+      "id": "room_5_6_397",
+      "name": "Crypt 704",
+      "description": "A dark and spooky place at 5,6.",
+      "exits": {
+        "north": "room_5_5_148"
+      },
+      "x": 5,
+      "y": 6,
+      "coins": 4,
+      "items": [
+        {
+          "id": "ring_19",
+          "name": "Gold Ring",
+          "description": "My precious."
+        }
+      ],
+      "locks": {}
+    },
+    "room_3_6_787": {
+      "id": "room_3_6_787",
+      "name": "Crypt 234",
+      "description": "A dark and spooky place at 3,6.",
+      "exits": {
+        "east": "room_4_6_632",
+        "west": "room_2_6_359",
+        "north": "room_3_5_895"
+      },
+      "x": 3,
+      "y": 6,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_2_6_359": {
+      "id": "room_2_6_359",
+      "name": "Dusty Library 128",
+      "description": "A dark and spooky place at 2,6.",
+      "exits": {
+        "east": "room_3_6_787",
+        "north": "room_2_5_983"
+      },
+      "x": 2,
+      "y": 6,
+      "coins": 5,
+      "items": [],
+      "locks": {}
+    },
+    "room_3_5_895": {
+      "id": "room_3_5_895",
+      "name": "Antechamber 592",
+      "description": "A dark and spooky place at 3,5.",
+      "exits": {
+        "east": "room_4_5_607",
+        "south": "room_3_6_787"
+      },
+      "x": 3,
+      "y": 5,
+      "coins": 2,
+      "items": [],
+      "locks": {}
+    },
+    "room_2_5_983": {
+      "id": "room_2_5_983",
+      "name": "Bedroom 977",
+      "description": "A dark and spooky place at 2,5.",
+      "exits": {
+        "south": "room_2_6_359"
+      },
+      "x": 2,
+      "y": 5,
+      "coins": 3,
+      "items": [],
+      "locks": {}
+    }
+  }
+}

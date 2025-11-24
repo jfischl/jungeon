@@ -283,7 +283,17 @@ export class GameManager {
             for (let x = px - range; x <= px + range; x++) {
                 const room = Object.values(this.roomManager.getAllRooms()).find(r => r.x === x && r.y === y);
 
-                // Only show room if player has explored it
+                // Check if current room has exits to this cell (for showing unexplored exits)
+                const roomAboveIsPlayer = (y === py - 1) && (x === px);
+                const roomBelowIsPlayer = (y === py + 1) && (x === px);
+                const roomToLeftIsPlayer = (y === py) && (x === px - 1);
+                const roomToRightIsPlayer = (y === py) && (x === px + 1);
+                const showNorthExitFromPlayer = roomAboveIsPlayer && pRoom.exits['north'];
+                const showSouthExitFromPlayer = roomBelowIsPlayer && pRoom.exits['south'];
+                const showWestExitFromPlayer = roomToLeftIsPlayer && pRoom.exits['west'];
+                const showEastExitFromPlayer = roomToRightIsPlayer && pRoom.exits['east'];
+
+                // Only show room if player has explored it OR it's adjacent to player with an exit
                 if (room && player.exploredRooms.has(room.id)) {
                     let symbol = "   ";
                     if (room.id === player.roomId) {
@@ -317,15 +327,28 @@ export class GameManager {
                         }
                     }
 
+                    // Override with exits from player room to unexplored areas
+                    if (showEastExitFromPlayer) showEastExit = true;
+                    if (showSouthExitFromPlayer) showSouthExit = true;
+                    if (showWestExitFromPlayer) showEastExit = true;  // West exits show as east connection from left cell
+                    if (showNorthExitFromPlayer) showSouthExit = true;  // North exits show as south connection from above cell
+
                     const east = showEastExit ? "-" : " ";
                     line1 += symbol + east;
 
                     const south = showSouthExit ? " | " : "   ";
                     line2 += south + " ";
                 } else {
-                    // Unexplored or no room - show blank
-                    line1 += "    ";
-                    line2 += "    ";
+                    // Unexplored or no room - but check if we should show exits from player room
+                    let symbol = "   ";
+                    let showEastExit = showWestExitFromPlayer || showEastExitFromPlayer;
+                    let showSouthExit = showNorthExitFromPlayer || showSouthExitFromPlayer;
+
+                    const east = showEastExit ? "-" : " ";
+                    line1 += symbol + east;
+
+                    const south = showSouthExit ? " | " : "   ";
+                    line2 += south + " ";
                 }
             }
             mapStr += line1 + "\n" + line2 + "\n";

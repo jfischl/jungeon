@@ -2,7 +2,7 @@
   "warrior": {
     "roomId": "room_0_0_94",
     "inventory": {
-      "coins": 158,
+      "coins": 123,
       "items": []
     },
     "exploredRooms": [
@@ -13,7 +13,7 @@
   "rogue": {
     "roomId": "room_0_0_94",
     "inventory": {
-      "coins": 16,
+      "coins": 36,
       "items": []
     },
     "exploredRooms": [

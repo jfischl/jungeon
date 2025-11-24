@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { RoomDataPacket, Inventory, Player } from '../../shared/types';
+import { validateCommandInput, sanitizeInput } from '../../shared/validators';
 
 console.log("Connecting to server at:", import.meta.env.VITE_SERVER_URL || 'http://localhost:3000');
 const socket: Socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3000', {
@@ -51,10 +52,19 @@ function updateButtons(exits: string[]): void {
 }
 
 function sendCommand(cmd: string): void {
-    if (cmd) {
-        socket.emit('command', cmd);
-        addLog(`> ${cmd}`, 'command');
+    if (!cmd) return;
+
+    // Client-side validation for immediate feedback
+    const validation = validateCommandInput(cmd);
+    if (!validation.valid) {
+        addLog(`Error: ${validation.error}`, 'error');
+        return;
     }
+
+    // Sanitize before sending
+    const sanitized = sanitizeInput(cmd);
+    socket.emit('command', sanitized);
+    addLog(`> ${sanitized}`, 'command');
 }
 
 // Button Listeners
@@ -189,16 +199,16 @@ socket.on('updateStats', (stats: { hp: number; maxHp: number; level: number; exp
 
 input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-        const cmd = input.value;
+        const cmd = sanitizeInput(input.value);
         input.value = '';
 
         // Check if we are logging in
         // This is a bit hacky, ideally we'd have a proper login state
-        if (cmd.trim().length > 0) {
+        if (cmd.length > 0) {
             // If it looks like a character ID, try login (simplified logic)
             const commonIds = ['warrior', 'rogue', 'mage', 'cleric'];
-            if (commonIds.includes(cmd.trim().toLowerCase())) {
-                socket.emit('login', cmd.trim().toLowerCase());
+            if (commonIds.includes(cmd.toLowerCase())) {
+                socket.emit('login', cmd.toLowerCase());
             } else {
                 sendCommand(cmd);
             }

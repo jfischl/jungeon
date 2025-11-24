@@ -20,6 +20,7 @@ import { HealCommand } from './commands/HealCommand';
 import { ChallengeCommand } from './commands/ChallengeCommand';
 import { AcceptCommand } from './commands/AcceptCommand';
 import { CONFIG } from './config';
+import { validateCommandInput, parseCommand, sanitizeInput, isValidMessage } from '../shared/validators';
 
 export class GameManager {
     io: Server;
@@ -180,13 +181,16 @@ export class GameManager {
     handleLogin(socket: Socket, charId: string): void {
         if (this.players.has(socket.id)) return;
 
-        const char = this.characters.find(c => c.id === charId);
+        // Sanitize character ID
+        const sanitizedCharId = sanitizeInput(charId, 50);
+
+        const char = this.characters.find(c => c.id === sanitizedCharId);
         if (!char) {
             socket.emit('error', "Invalid character.");
             return;
         }
 
-        const isTaken = Array.from(this.players.values()).some(p => p.character.id === charId);
+        const isTaken = Array.from(this.players.values()).some(p => p.character.id === sanitizedCharId);
         if (isTaken) {
             socket.emit('error', "Character already taken.");
             socket.emit('updateCharacterList', this.getAvailableCharacters());
@@ -239,9 +243,15 @@ export class GameManager {
     handleCommand(socket: Socket, commandString: string): void {
         if (!this.players.has(socket.id)) return;
 
-        const parts = commandString.trim().split(' ');
-        const action = parts[0].toLowerCase();
-        const args = parts.slice(1).join(' ');
+        // Validate input
+        const validation = validateCommandInput(commandString);
+        if (!validation.valid) {
+            socket.emit('error', validation.error || 'Invalid command');
+            return;
+        }
+
+        // Parse and sanitize
+        const { command: action, args } = parseCommand(commandString);
 
         const command = this.commands.get(action);
         if (command) {
@@ -431,14 +441,30 @@ export class GameManager {
 
     say(socket: Socket, message: string): void {
         const player = this.players.get(socket.id)!;
-        this.broadcastToRoom(player.roomId, `${player.character.name} says: "${message}"`, socket.id);
-        socket.emit('message', `You say: "${message}"`);
+
+        // Validate message
+        if (!isValidMessage(message)) {
+            socket.emit('error', 'Invalid message (empty, too long, or contains prohibited content)');
+            return;
+        }
+
+        const sanitized = sanitizeInput(message);
+        this.broadcastToRoom(player.roomId, `${player.character.name} says: "${sanitized}"`, socket.id);
+        socket.emit('message', `You say: "${sanitized}"`);
     }
 
     emote(socket: Socket, action: string): void {
         const player = this.players.get(socket.id)!;
-        this.broadcastToRoom(player.roomId, `${player.character.name} ${action}`, socket.id);
-        socket.emit('message', `You ${action}`);
+
+        // Validate action
+        if (!isValidMessage(action)) {
+            socket.emit('error', 'Invalid action (empty, too long, or contains prohibited content)');
+            return;
+        }
+
+        const sanitized = sanitizeInput(action);
+        this.broadcastToRoom(player.roomId, `${player.character.name} ${sanitized}`, socket.id);
+        socket.emit('message', `You ${sanitized}`);
     }
 
     debug(socket: Socket): void {

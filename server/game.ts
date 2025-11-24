@@ -412,7 +412,7 @@ export class GameManager {
             let line2 = "";
 
             for (let x = px - range; x <= px + range; x++) {
-                const room = Object.values(this.rooms).find(r => r.x === x && r.y === y);
+                const room = Object.values(this.roomManager.getAllRooms()).find(r => r.x === x && r.y === y);
 
                 // Only show room if player has explored it
                 if (room && player.exploredRooms.has(room.id)) {

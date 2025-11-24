@@ -369,20 +369,22 @@ export class GameManager {
         const existing = this.roomOperationQueues.get(roomId) || Promise.resolve();
 
         // Chain the new operation after the existing queue
-        const newOperation = existing.then(() => operation()).catch((error) => {
-            gameLogger.error({ roomId, error }, 'Room operation failed');
-            throw error;
-        });
+        const newOperation = existing
+            .then(() => operation())
+            .catch((error) => {
+                gameLogger.error({ roomId, error }, 'Room operation failed');
+                throw error;
+            })
+            .finally(() => {
+                // Clean up resolved promises to prevent memory leaks
+                // Only delete if no newer operation has replaced us
+                if (this.roomOperationQueues.get(roomId) === newOperation) {
+                    this.roomOperationQueues.delete(roomId);
+                }
+            });
 
-        // Update the queue
+        // Update the queue BEFORE returning
         this.roomOperationQueues.set(roomId, newOperation);
-
-        // Clean up resolved promises to prevent memory leaks
-        newOperation.finally(() => {
-            if (this.roomOperationQueues.get(roomId) === newOperation) {
-                this.roomOperationQueues.delete(roomId);
-            }
-        });
 
         return newOperation;
     }

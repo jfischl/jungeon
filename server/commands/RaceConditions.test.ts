@@ -172,11 +172,15 @@ describe('Race Condition Prevention', () => {
             const player1 = gameManager.playerManager.getPlayer(mockSocket1.id)!;
             const player2 = gameManager.playerManager.getPlayer(mockSocket2.id)!;
 
-            // Put players in different rooms
+            // Put players in different rooms - ensure they're actually different
             const room1 = gameManager.roomManager.getRoom(player1.roomId)!;
-            const room2Id = gameManager.roomManager.getRandomRoomId();
+            const allRooms = gameManager.roomManager.getAllRooms();
+            const room2Id = Object.keys(allRooms).find((id: string) => id !== player1.roomId)!;
             player2.roomId = room2Id;
             const room2 = gameManager.roomManager.getRoom(room2Id)!;
+
+            // Verify players are in different rooms
+            expect(room1.id).not.toBe(room2.id);
 
             // Each room has coins
             room1.coins = 50;
@@ -311,6 +315,34 @@ describe('Race Condition Prevention', () => {
             // Verify no duplication occurred
             const finalTotal = room.coins + player1.inventory.coins + player2.inventory.coins;
             expect(finalTotal).toBe(initialTotal); // NO DUPLICATION!
+        });
+
+        it('should handle extreme concurrency (50 simultaneous operations)', async () => {
+            const player1 = gameManager.playerManager.getPlayer(mockSocket1.id)!;
+            const player2 = gameManager.playerManager.getPlayer(mockSocket2.id)!;
+            const room = gameManager.roomManager.getRoom(player1.roomId)!;
+
+            // Set up: Room has 1000 coins
+            room.coins = 1000;
+            player1.inventory.coins = 0;
+            player2.inventory.coins = 0;
+
+            const initialTotal = 1000;
+
+            // Create 50 concurrent collect operations
+            const operations: Promise<void>[] = [];
+            for (let i = 0; i < 25; i++) {
+                operations.push(gameManager.collect(mockSocket1));
+                operations.push(gameManager.collect(mockSocket2));
+            }
+
+            // Execute all 50 operations concurrently
+            await Promise.all(operations);
+
+            // Verify coin conservation
+            const finalTotal = room.coins + player1.inventory.coins + player2.inventory.coins;
+            expect(finalTotal).toBe(initialTotal); // NO DUPLICATION!
+            expect(room.coins).toBe(0); // Room should be empty
         });
     });
 });

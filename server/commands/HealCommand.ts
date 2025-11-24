@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
+import { CONFIG } from '../config';
 
 export class HealCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -22,7 +23,7 @@ export class HealCommand implements Command {
         player.inventory.items.splice(potionIndex, 1);
 
         // Heal player
-        const healAmount = 30;
+        const healAmount = CONFIG.HEALING.POTION_HEAL_AMOUNT;
         const oldHp = player.hp;
         player.hp = Math.min(player.maxHp, player.hp + healAmount);
         const actualHeal = player.hp - oldHp;

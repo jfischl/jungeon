@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
+import { CONFIG } from '../config';
 
 export class ChallengeCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -36,8 +37,8 @@ export class ChallengeCommand implements Command {
         }
 
         // Check safeguards
-        if (targetPlayer.level < 3) {
-            socket.emit('message', `${targetPlayer.character.name} has newbie protection (under level 3).`);
+        if (targetPlayer.level < CONFIG.PVP.NEWBIE_PROTECTION_LEVEL) {
+            socket.emit('message', `${targetPlayer.character.name} has newbie protection (under level ${CONFIG.PVP.NEWBIE_PROTECTION_LEVEL}).`);
             return;
         }
 
@@ -60,7 +61,7 @@ export class ChallengeCommand implements Command {
         const targetSocket = Array.from(game.io.sockets.sockets.values()).find(s => s.id === targetPlayer.id);
         if (targetSocket) {
             targetSocket.emit('message', `⚔️  ${challenger.character.name} has challenged you to a duel!`);
-            targetSocket.emit('message', `Type 'accept' within 15 seconds to fight!`);
+            targetSocket.emit('message', `Type 'accept' within ${CONFIG.PVP.CHALLENGE_TIMEOUT_MS / 1000} seconds to fight!`);
         }
 
         // Set expiration
@@ -72,6 +73,6 @@ export class ChallengeCommand implements Command {
                     targetSocket.emit('message', `Challenge from ${challenger.character.name} expired.`);
                 }
             }
-        }, 15000);
+        }, CONFIG.PVP.CHALLENGE_TIMEOUT_MS);
     }
 }

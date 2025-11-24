@@ -19,6 +19,7 @@ import { DefendCommand } from './commands/DefendCommand';
 import { HealCommand } from './commands/HealCommand';
 import { ChallengeCommand } from './commands/ChallengeCommand';
 import { AcceptCommand } from './commands/AcceptCommand';
+import { CONFIG } from './config';
 
 export class GameManager {
     io: Server;
@@ -461,15 +462,15 @@ export class GameManager {
     }
 
     startGhostLoop(): void {
-        this.ghosts = [
-            { name: "The Weeping Lady", desc: "A translucent figure sobbing uncontrollably.", roomId: this.getRandomRoomId(), hp: 40, maxHp: 40, attack: 12, defense: 5, goldReward: 25, combatants: new Set() },
-            { name: "The Headless Guard", desc: "He carries his head under his arm.", roomId: this.getRandomRoomId(), hp: 60, maxHp: 60, attack: 15, defense: 8, goldReward: 40, combatants: new Set() },
-            { name: "The Chain Rattler", desc: "Covered in heavy iron chains.", roomId: this.getRandomRoomId(), hp: 50, maxHp: 50, attack: 18, defense: 3, goldReward: 30, combatants: new Set() }
-        ];
+        this.ghosts = CONFIG.GHOSTS.DEFAULT_SPAWNS.map(spawn => ({
+            ...spawn,
+            roomId: this.getRandomRoomId(),
+            combatants: new Set<string>()
+        }));
 
         setInterval(() => {
             this.moveGhosts();
-        }, 15000);
+        }, CONFIG.GHOSTS.MOVE_INTERVAL_MS);
     }
 
     moveGhosts(): void {

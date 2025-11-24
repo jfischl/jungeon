@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
+import { CONFIG } from '../config';
 
 export class AttackCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -113,13 +114,13 @@ export class AttackCommand implements Command {
                 if (ghostIndex !== -1) {
                     game.ghosts.splice(ghostIndex, 1);
 
-                    // Respawn ghost after 5 minutes
+                    // Respawn ghost after configured time
                     setTimeout(() => {
                         ghost.hp = ghost.maxHp;
                         ghost.roomId = game.getRandomRoomId();
                         ghost.combatants = new Set(); // Reset combatants
                         game.ghosts.push(ghost);
-                    }, 300000);
+                    }, CONFIG.GHOSTS.RESPAWN_TIME_MS);
                 }
 
                 game.saveGame();

@@ -107,11 +107,18 @@ describe('CombatManager Unit Tests', () => {
                 isDefending: false
             };
 
-            const normalDamage = combatManager.calculateDamage(attacker, defender, false);
-            const defendingDamage = combatManager.calculateDamage(attacker, defender, true);
+            // Run multiple times to verify defending consistently reduces damage
+            let totalNormalDamage = 0;
+            let totalDefendingDamage = 0;
+            const iterations = 20;
 
-            // Defending should reduce damage (not always less due to random dice rolls, but max damage should be about half)
-            expect(defendingDamage).toBeLessThanOrEqual(Math.floor(normalDamage / 2) + 3);
+            for (let i = 0; i < iterations; i++) {
+                totalNormalDamage += combatManager.calculateDamage(attacker, defender, false);
+                totalDefendingDamage += combatManager.calculateDamage(attacker, defender, true);
+            }
+
+            // Defending should reduce average damage by approximately 50%
+            expect(totalDefendingDamage).toBeLessThan(totalNormalDamage * 0.6); // Allow some variance
         });
 
         it('should deal minimum 1 damage', () => {

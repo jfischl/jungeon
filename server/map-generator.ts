@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Room, Item, WorldData } from '../shared/types';
+import { CONFIG } from './config';
 
-const NUM_ROOMS = 100;
+const NUM_ROOMS = CONFIG.MAP.ROOM_COUNT;
 const ROOM_NAMES: string[] = [
     "Damp Cave", "Dusty Library", "Armory", "Kitchen", "Throne Room",
     "Dungeon Cell", "Guard Room", "Torture Chamber", "Crypt", "Laboratory",
@@ -250,11 +251,11 @@ export class MapGenerator {
     }
 
     placeLocksAndKeys(): void {
-        const numLocks = 5 + Math.floor(Math.random() * 5); // 5-10
+        const numLocks = CONFIG.MAP.MIN_LOCKS + Math.floor(Math.random() * (CONFIG.MAP.MAX_LOCKS - CONFIG.MAP.MIN_LOCKS));
         let locksPlaced = 0;
         let attempts = 0;
 
-        while (locksPlaced < numLocks && attempts < 100) {
+        while (locksPlaced < numLocks && attempts < CONFIG.MAP.MAX_LOCK_ATTEMPTS) {
             attempts++;
             const roomId = this.roomIds[Math.floor(Math.random() * NUM_ROOMS)];
             const room = this.rooms[roomId];

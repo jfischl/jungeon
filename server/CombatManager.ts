@@ -1,6 +1,7 @@
 import { Player } from '../shared/types';
 import { Socket } from 'socket.io';
 import { GameManager } from './game';
+import { CONFIG } from './config';
 
 export class CombatManager {
     private game: GameManager;
@@ -15,17 +16,17 @@ export class CombatManager {
     calculateDamage(attacker: Player, defender: Player, isDefending: boolean = false): number {
         const baseDamage = attacker.attack - (defender.defense / 2);
         const diceRoll = Math.floor(Math.random() * 6) + 1; // 1-6
-        let actualDamage = Math.max(1, baseDamage + diceRoll); // Minimum 1 damage
+        let actualDamage = Math.max(CONFIG.COMBAT.MINIMUM_DAMAGE, baseDamage + diceRoll);
 
-        // Defending reduces damage by 50%
+        // Defending reduces damage
         if (isDefending) {
-            actualDamage = Math.floor(actualDamage / 2);
+            actualDamage = Math.floor(actualDamage * CONFIG.COMBAT.DEFEND_DAMAGE_REDUCTION);
         }
 
-        // 10% critical hit chance (double damage)
+        // Critical hit chance
         const critChance = Math.random();
-        if (critChance < 0.1) {
-            actualDamage *= 2;
+        if (critChance < CONFIG.COMBAT.CRITICAL_HIT_CHANCE) {
+            actualDamage *= CONFIG.COMBAT.CRITICAL_HIT_MULTIPLIER;
             return actualDamage; // Return early to indicate crit
         }
 
@@ -55,21 +56,24 @@ export class CombatManager {
 
         if (!socket) return;
 
-        // Calculate gold loss (30% or max 50 coins)
-        const goldLoss = Math.min(50, Math.floor(deadPlayer.inventory.coins * 0.3));
+        // Calculate gold loss
+        const goldLoss = Math.min(
+            CONFIG.DEATH.MAX_GOLD_LOSS,
+            Math.floor(deadPlayer.inventory.coins * CONFIG.DEATH.GOLD_LOSS_PERCENTAGE)
+        );
         deadPlayer.inventory.coins -= goldLoss;
 
         // Transfer gold to killer if it was PvP
         if (killer) {
             killer.inventory.coins += goldLoss;
-            killer.experience += 50;
+            killer.experience += CONFIG.DEATH.PVP_XP_REWARD;
 
             const killerSocket = Array.from(game.players.entries())
                 .find(([_, p]) => p.id === killer.id)?.[0];
 
             if (killerSocket) {
                 game.io.to(killerSocket).emit('message',
-                    `You defeated ${deadPlayer.character.name}! +${goldLoss} coins, +50 XP`
+                    `You defeated ${deadPlayer.character.name}! +${goldLoss} coins, +${CONFIG.DEATH.PVP_XP_REWARD} XP`
                 );
             }
         }
@@ -79,11 +83,11 @@ export class CombatManager {
         deadPlayer.roomId = game.worldData.starting_room;
         deadPlayer.inCombat = false;
         deadPlayer.combatTarget = null;
-        deadPlayer.experience = Math.max(0, deadPlayer.experience - 25);
+        deadPlayer.experience = Math.max(0, deadPlayer.experience - CONFIG.DEATH.XP_LOSS);
 
         // Notify player
         game.io.to(socket).emit('message',
-            `You have been defeated! -${goldLoss} coins, -25 XP. Respawned at starting room.`
+            `You have been defeated! -${goldLoss} coins, -${CONFIG.DEATH.XP_LOSS} XP. Respawned at starting room.`
         );
         game.look(game.io.sockets.sockets.get(socket)!);
     }
@@ -94,17 +98,17 @@ export class CombatManager {
     awardExperience(player: Player, xp: number, socket: Socket): void {
         player.experience += xp;
 
-        // Check for level up (100 XP per level)
-        const newLevel = Math.floor(player.experience / 100) + 1;
+        // Check for level up
+        const newLevel = Math.floor(player.experience / CONFIG.LEVELING.XP_PER_LEVEL) + 1;
         if (newLevel > player.level) {
             player.level = newLevel;
-            player.maxHp += 10;
+            player.maxHp += CONFIG.LEVELING.HP_PER_LEVEL;
             player.hp = player.maxHp; // Full heal on level up
-            player.attack += 1;
-            player.defense += 1;
+            player.attack += CONFIG.LEVELING.ATTACK_PER_LEVEL;
+            player.defense += CONFIG.LEVELING.DEFENSE_PER_LEVEL;
 
             socket.emit('message',
-                `🎉 LEVEL UP! You are now level ${player.level}! +10 HP, +1 ATK, +1 DEF`
+                `🎉 LEVEL UP! You are now level ${player.level}! +${CONFIG.LEVELING.HP_PER_LEVEL} HP, +${CONFIG.LEVELING.ATTACK_PER_LEVEL} ATK, +${CONFIG.LEVELING.DEFENSE_PER_LEVEL} DEF`
             );
         }
     }

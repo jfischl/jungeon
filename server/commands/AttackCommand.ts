@@ -2,6 +2,8 @@ import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
 import { CONFIG } from '../config';
+import { Player } from '../../shared/types';
+import { Ghost } from '../managers/GhostManager';
 
 export class AttackCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -40,7 +42,7 @@ export class AttackCommand implements Command {
         socket.emit('message', `You don't see "${args}" here.`);
     }
 
-    private initiateGhostCombat(socket: Socket, player: any, ghost: any, game: GameManager): void {
+    private initiateGhostCombat(socket: Socket, player: Player, ghost: Ghost, game: GameManager): void {
         // Add player to ghost's combatants if not already there
         if (!ghost.combatants.has(player.id)) {
             ghost.combatants.add(player.id);
@@ -197,7 +199,7 @@ export class AttackCommand implements Command {
         }
     }
 
-    private initiatePvPCombat(socket: Socket, attacker: any, defender: any, game: GameManager): void {
+    private initiatePvPCombat(socket: Socket, attacker: Player, defender: Player, game: GameManager): void {
         // Check if they are actually in combat with each other
         if (!attacker.inCombat || !defender.inCombat ||
             attacker.combatTarget !== defender.character.name ||

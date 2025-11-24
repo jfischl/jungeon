@@ -1,6 +1,7 @@
 import { GetCommand } from './GetCommand';
 import { DropCommand } from './DropCommand';
 import { GameManager } from '../game';
+import { setupMockGameManager } from '../testFixtures';
 
 /**
  * Race Condition Prevention Tests (TDD Style)
@@ -31,6 +32,7 @@ describe('Race Condition Prevention', () => {
         } as any;
 
         gameManager = new GameManager(mockIo);
+        setupMockGameManager(gameManager);
         getCommand = new GetCommand();
         dropCommand = new DropCommand();
 
@@ -292,6 +294,7 @@ describe('Race Condition Prevention', () => {
 
             // Player 1 drops 1000 coins
             player1.inventory.coins = 1000;
+            player2.inventory.coins = 0; // Ensure player2 starts with 0 coins
             room.coins = 0;
 
             const initialTotal = 1000;

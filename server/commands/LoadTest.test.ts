@@ -1,4 +1,5 @@
 import { GameManager } from '../game';
+import { setupMockGameManager } from '../testFixtures';
 
 /**
  * Load Test for Race Condition Fix
@@ -19,6 +20,7 @@ describe('Load Test - Race Condition Prevention', () => {
         } as any;
 
         gameManager = new GameManager(mockIo);
+        setupMockGameManager(gameManager);
     });
 
     // Helper to create mock characters for testing

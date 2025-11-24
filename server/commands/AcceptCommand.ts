@@ -47,7 +47,7 @@ export class AcceptCommand implements Command {
         acceptor.combatTarget = challenger.character.name;
 
         // Notify room
-        game.broadcastToRoom(acceptor.roomId, `⚔️  DUEL STARTED: ${challenger.character.name} vs ${acceptor.character.name}!`, '');
+        game.worldService.broadcastToRoom(acceptor.roomId, `⚔️  DUEL STARTED: ${challenger.character.name} vs ${acceptor.character.name}!`, '');
 
         const challengerSocket = Array.from(game.io.sockets.sockets.values()).find(s => s.id === challenger.id);
 

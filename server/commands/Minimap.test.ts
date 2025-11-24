@@ -126,7 +126,7 @@ describe('Minimap Display Tests', () => {
         player.roomId = 'center';
 
         // Generate minimap
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // The minimap should show a vertical bar above the player position indicating north exit
         // Format: The player is "*" and north exit shows as "|" in the line below the player
@@ -156,7 +156,7 @@ describe('Minimap Display Tests', () => {
         player.exploredRooms = new Set(['center']);
         player.roomId = 'center';
 
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // South exit shows as "|" in the line immediately after the player's line
         const lines = minimap.split('\n');
@@ -180,7 +180,7 @@ describe('Minimap Display Tests', () => {
         player.exploredRooms = new Set(['center']);
         player.roomId = 'center';
 
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // East exit shows as "-" immediately to the right of the player on the same line
         const lines = minimap.split('\n');
@@ -206,7 +206,7 @@ describe('Minimap Display Tests', () => {
         player.exploredRooms = new Set(['center']);
         player.roomId = 'center';
 
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // West exit is shown indirectly: the algorithm shows it as an east exit
         // from the west room's position (which is to the left of player)
@@ -222,7 +222,7 @@ describe('Minimap Display Tests', () => {
         player.exploredRooms = new Set(['center']);
         player.roomId = 'center';
 
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Should show connections in all four directions
         expect(minimap).toContain('*'); // Player
@@ -238,7 +238,7 @@ describe('Minimap Display Tests', () => {
         player.exploredRooms = new Set(['center', 'north_room']);
         player.roomId = 'center';
 
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
         const lines = minimap.split('\n');
 
         // Find the north room representation (should be [ ])
@@ -262,7 +262,7 @@ describe('Minimap Display Tests', () => {
         player.exploredRooms = new Set(['center', 'north_room', 'south_room']);
         player.roomId = 'center';
 
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Player should be represented as "*"
         expect(minimap).toContain('*');
@@ -304,7 +304,7 @@ describe('Minimap Display Tests', () => {
         player2.exploredRooms = new Set(['north_room']);
 
         // Get player1's minimap
-        const minimap = gameManager.getMinimap(player1);
+        const minimap = gameManager.worldService.getMinimap(player1);
 
         // Should show player1 as * and player2 as P
         expect(minimap).toContain('*');
@@ -319,7 +319,7 @@ describe('Minimap Display Tests', () => {
         player.exploredRooms = new Set(['center']);
         player.roomId = 'center';
 
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Should only show player symbol, not room symbols for unexplored areas
         const roomSymbolCount = (minimap.match(/\[ \]/g) || []).length;

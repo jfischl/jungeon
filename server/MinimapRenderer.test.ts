@@ -105,7 +105,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.vertical).toBeGreaterThanOrEqual(1);
@@ -144,7 +144,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.vertical).toBeGreaterThanOrEqual(1);
@@ -183,7 +183,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(1);
@@ -222,7 +222,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(1);
@@ -274,7 +274,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.vertical).toBeGreaterThanOrEqual(2);
@@ -324,7 +324,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(2);
@@ -374,7 +374,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(1);
@@ -424,7 +424,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(1);
@@ -474,7 +474,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(1);
@@ -524,7 +524,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(1);
@@ -587,7 +587,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(1);
@@ -648,7 +648,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(2);
@@ -709,7 +709,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(1);
@@ -770,7 +770,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(2);
@@ -844,7 +844,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBeGreaterThanOrEqual(2);
@@ -875,7 +875,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             const exitMarkers = countExitMarkers(minimap);
             expect(exitMarkers.horizontal).toBe(0);
@@ -928,7 +928,7 @@ describe('Minimap Renderer - All Exit Combinations', () => {
             gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
             const player = gameManager.playerManager.getPlayer('socket1')!;
-            const minimap = gameManager.getMinimap(player);
+            const minimap = gameManager.worldService.getMinimap(player);
 
             // Should show exit indicators even though adjacent rooms aren't explored
             const exitMarkers = countExitMarkers(minimap);

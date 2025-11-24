@@ -17,7 +17,7 @@ export class FleeCommand implements Command {
         if (fleeChance < 0.7) {
             // Successfully fled
             socket.emit('message', `You fled from combat with ${player.combatTarget}!`);
-            game.broadcastToRoom(player.roomId, `${player.character.name} fled from combat!`, socket.id);
+            game.worldService.broadcastToRoom(player.roomId, `${player.character.name} fled from combat!`, socket.id);
 
             player.inCombat = false;
             player.combatTarget = null;

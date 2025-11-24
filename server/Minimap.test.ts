@@ -127,7 +127,7 @@ describe('Minimap', () => {
         expect(player).toBeDefined();
 
         // Get the minimap
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Minimap should not be empty or all spaces
         expect(minimap).toBeTruthy();
@@ -149,7 +149,7 @@ describe('Minimap', () => {
         expect(player.exploredRooms.size).toBe(1);
 
         // Get the minimap
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Should contain exactly one "*" (current room)
         const starCount = (minimap.match(/\*/g) || []).length;
@@ -175,7 +175,7 @@ describe('Minimap', () => {
         expect(player.exploredRooms.has('room_0_1')).toBe(true);
 
         // Get the minimap
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Should contain one "*" (current room) and one "[ ]" (previously explored room)
         const starCount = (minimap.match(/\*/g) || []).length;
@@ -204,7 +204,7 @@ describe('Minimap', () => {
         expect(player.exploredRooms.has('room_1_0')).toBe(true);
 
         // Get the minimap
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Should contain one "*" (current room in room_1_0)
         const starCount = (minimap.match(/\*/g) || []).length;
@@ -225,7 +225,7 @@ describe('Minimap', () => {
         expect(player.exploredRooms.size).toBe(1);
 
         // Get the minimap
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Count the number of room markers (should be exactly 1: the "*")
         const starCount = (minimap.match(/\*/g) || []).length;
@@ -254,7 +254,7 @@ describe('Minimap', () => {
         expect(player.exploredRooms.size).toBe(5);
 
         // Get the minimap
-        const minimap = gameManager.getMinimap(player);
+        const minimap = gameManager.worldService.getMinimap(player);
 
         // Verify the minimap is properly structured with newlines
         const lines = minimap.split('\n');

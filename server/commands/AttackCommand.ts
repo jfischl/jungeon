@@ -73,7 +73,7 @@ export class AttackCommand implements Command {
 
             socket.emit('message', `You attack ${ghost.name} for ${damage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`);
             socket.emit('message', `${ghost.name}: ${ghost.hp}/${ghost.maxHp} HP`);
-            game.broadcastToRoom(player.roomId, `${player.character.name} attacks ${ghost.name}!`, socket.id);
+            game.worldService.broadcastToRoom(player.roomId, `${player.character.name} attacks ${ghost.name}!`, socket.id);
 
             if (ghost.hp <= 0) {
                 // Ghost defeated - distribute rewards to all combatants
@@ -109,7 +109,7 @@ export class AttackCommand implements Command {
                     }
                 });
 
-                game.broadcastToRoom(player.roomId, `${ghost.name} has been vanquished!`, '');
+                game.worldService.broadcastToRoom(player.roomId, `${ghost.name} has been vanquished!`, '');
 
                 // Remove ghost and respawn elsewhere later
                 game.ghostManager.removeGhost(ghost);
@@ -182,7 +182,7 @@ export class AttackCommand implements Command {
             }
 
             socket.emit('message', `${ghost.name}: ${ghost.hp}/${ghost.maxHp} HP`);
-            game.broadcastToRoom(player.roomId, `${player.character.name} engages ${ghost.name} in combat!`, socket.id);
+            game.worldService.broadcastToRoom(player.roomId, `${player.character.name} engages ${ghost.name} in combat!`, socket.id);
 
             // Trigger first attack
             this.initiateGhostCombat(socket, player, ghost, game);
@@ -234,11 +234,11 @@ export class AttackCommand implements Command {
         }
 
         // Notify room
-        game.broadcastToRoom(attacker.roomId, `${attacker.character.name} attacks ${defender.character.name}!`, socket.id);
+        game.worldService.broadcastToRoom(attacker.roomId, `${attacker.character.name} attacks ${defender.character.name}!`, socket.id);
 
         // Check for death
         if (defender.hp <= 0) {
-            game.broadcastToRoom(attacker.roomId, `💀 ${attacker.character.name} has defeated ${defender.character.name} in a duel!`, '');
+            game.worldService.broadcastToRoom(attacker.roomId, `💀 ${attacker.character.name} has defeated ${defender.character.name} in a duel!`, '');
 
             // Handle death (rewards transfer handled in CombatManager)
             game.combatManager.handleDeath(defender, attacker, game);

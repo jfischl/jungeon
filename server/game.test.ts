@@ -142,21 +142,21 @@ describe('GameManager', () => {
 
     describe('getNearbyRoomId', () => {
         test('should return a room ID from exits of starting room', () => {
-            const nearbyRoomId = gameManager.getNearbyRoomId('room_a');
+            const nearbyRoomId = gameManager.worldService.getNearbyRoomId('room_a');
 
             // room_a has only one exit: north -> room_b
             expect(nearbyRoomId).toBe('room_b');
         });
 
         test('should return random exit when multiple exits exist', () => {
-            const nearbyRoomId = gameManager.getNearbyRoomId('room_b');
+            const nearbyRoomId = gameManager.worldService.getNearbyRoomId('room_b');
 
             // room_b has exits to room_a and room_c
             expect(['room_a', 'room_c']).toContain(nearbyRoomId);
         });
 
         test('should return random room when starting room does not exist', () => {
-            const nearbyRoomId = gameManager.getNearbyRoomId('nonexistent_room');
+            const nearbyRoomId = gameManager.worldService.getNearbyRoomId('nonexistent_room');
 
             // Should fallback to random room selection
             expect(nearbyRoomId).toBeDefined();
@@ -177,7 +177,7 @@ describe('GameManager', () => {
             };
             gameManager.roomManager.loadWorldData(gameManager.worldData);
 
-            const nearbyRoomId = gameManager.getNearbyRoomId('isolated_room');
+            const nearbyRoomId = gameManager.worldService.getNearbyRoomId('isolated_room');
 
             // Should fallback to random room selection
             expect(nearbyRoomId).toBeDefined();

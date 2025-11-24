@@ -1,30 +1,15 @@
 import { Server, Socket } from 'socket.io';
 import { Player, Room, Character, WorldData, RoomDataPacket, Inventory } from '../shared/types';
 import { WorldRepository } from './data/WorldRepository';
-import { Command } from './commands/Command';
-import { MoveCommand } from './commands/MoveCommand';
-import { LookCommand } from './commands/LookCommand';
-import { GetCommand } from './commands/GetCommand';
-import { DropCommand } from './commands/DropCommand';
-import { InventoryCommand } from './commands/InventoryCommand';
-import { SayCommand } from './commands/SayCommand';
-import { EmoteCommand } from './commands/EmoteCommand';
-import { DebugCommand } from './commands/DebugCommand';
-import { ExamineCommand } from './commands/ExamineCommand';
-import { UnlockCommand } from './commands/UnlockCommand';
-import { AttackCommand } from './commands/AttackCommand';
 import { CombatManager } from './CombatManager';
-import { FleeCommand } from './commands/FleeCommand';
-import { DefendCommand } from './commands/DefendCommand';
-import { HealCommand } from './commands/HealCommand';
-import { ChallengeCommand } from './commands/ChallengeCommand';
-import { AcceptCommand } from './commands/AcceptCommand';
 import { CONFIG } from './config';
-import { validateCommandInput, parseCommand, sanitizeInput, isValidMessage } from '../shared/validators';
+import { sanitizeInput, isValidMessage } from '../shared/validators';
 import { PlayerManager } from './managers/PlayerManager';
 import { RoomManager } from './managers/RoomManager';
 import { GhostManager, Ghost } from './managers/GhostManager';
 import { ConnectionManager } from './managers/ConnectionManager';
+import { CommandRegistry } from './commands/CommandRegistry';
+import { WorldService } from './services/WorldService';
 import { gameLogger, playerLogger } from './logger';
 
 export class GameManager {
@@ -36,13 +21,14 @@ export class GameManager {
     roomManager: RoomManager;
     ghostManager: GhostManager;
     connectionManager: ConnectionManager;
+    commandRegistry: CommandRegistry;
+    worldService: WorldService;
 
     characters: Character[];
     combatManager: CombatManager;
     pendingChallenges: Map<string, { challengerId: string; targetId: string; timestamp: number }>;
 
     private repository: WorldRepository;
-    private commands: Map<string, Command>;
     private roomOperationQueues: Map<string, Promise<any>>;
 
     constructor(io: Server) {
@@ -51,20 +37,20 @@ export class GameManager {
         // Initialize managers
         this.playerManager = new PlayerManager();
         this.roomManager = new RoomManager();
+        this.worldService = new WorldService(io, this.roomManager, this.playerManager);
         this.ghostManager = new GhostManager(
-            () => this.getRandomRoomId(),
-            (startingRoomId) => this.getNearbyRoomId(startingRoomId)
+            () => this.worldService.getRandomRoomId(),
+            (startingRoomId) => this.worldService.getNearbyRoomId(startingRoomId)
         );
 
         this.worldData = { starting_room: '', rooms: {} };
         this.characters = [];
 
         this.repository = new WorldRepository();
-        this.commands = new Map();
+        this.commandRegistry = new CommandRegistry();
         this.combatManager = new CombatManager(this);
         this.pendingChallenges = new Map();
         this.roomOperationQueues = new Map();
-        this.registerCommands();
 
         this.loadGame();
 
@@ -75,7 +61,7 @@ export class GameManager {
             this.repository,
             () => this.characters,
             () => this.worldData,
-            (roomId, message, excludeId) => this.broadcastToRoom(roomId, message, excludeId),
+            (roomId, message, excludeId) => this.worldService.broadcastToRoom(roomId, message, excludeId),
             (socket) => this.look(socket),
             (socket) => this.sendStats(socket),
             () => this.saveGame(),
@@ -85,45 +71,6 @@ export class GameManager {
         this.startGhostLoop();
     }
 
-    private registerCommands(): void {
-        this.commands.set('n', new MoveCommand('north'));
-        this.commands.set('north', new MoveCommand('north'));
-        this.commands.set('s', new MoveCommand('south'));
-        this.commands.set('south', new MoveCommand('south'));
-        this.commands.set('e', new MoveCommand('east'));
-        this.commands.set('east', new MoveCommand('east'));
-        this.commands.set('w', new MoveCommand('west'));
-        this.commands.set('west', new MoveCommand('west'));
-
-        this.commands.set('look', new LookCommand());
-        this.commands.set('l', new LookCommand()); // Added 'l' alias
-        this.commands.set('get', new GetCommand());
-        this.commands.set('collect', new GetCommand());
-        this.commands.set('drop', new DropCommand());
-        this.commands.set('inv', new InventoryCommand());
-        this.commands.set('inventory', new InventoryCommand());
-
-        this.commands.set('say', new SayCommand());
-        this.commands.set('emote', new EmoteCommand());
-        this.commands.set('me', new EmoteCommand()); // Added 'me' alias
-        this.commands.set('debug', new DebugCommand());
-
-        this.commands.set('examine', new ExamineCommand());
-        this.commands.set('ex', new ExamineCommand()); // Short alias
-        this.commands.set('unlock', new UnlockCommand());
-
-        this.commands.set('attack', new AttackCommand());
-        this.commands.set('kill', new AttackCommand()); // Alias
-        this.commands.set('flee', new FleeCommand());
-        this.commands.set('run', new FleeCommand()); // Alias
-        this.commands.set('defend', new DefendCommand());
-        this.commands.set('block', new DefendCommand()); // Alias
-        this.commands.set('heal', new HealCommand());
-        this.commands.set('drink', new HealCommand()); // Alias
-        this.commands.set('challenge', new ChallengeCommand());
-        this.commands.set('duel', new ChallengeCommand()); // Alias
-        this.commands.set('accept', new AcceptCommand());
-    }
 
     loadGame(): void {
         gameLogger.info('Loading game data...');
@@ -166,37 +113,7 @@ export class GameManager {
 
     handleCommand(socket: Socket, commandString: string): void {
         if (!this.playerManager.hasPlayer(socket.id)) return;
-
-        // Validate input
-        const validation = validateCommandInput(commandString);
-        if (!validation.valid) {
-            const player = this.playerManager.getPlayer(socket.id);
-            gameLogger.warn(
-                {
-                    player: player?.character.name,
-                    input: commandString.substring(0, 50),
-                    error: validation.error
-                },
-                'Invalid command input'
-            );
-            socket.emit('error', validation.error || 'Invalid command');
-            return;
-        }
-
-        // Parse and sanitize
-        const { command: action, args } = parseCommand(commandString);
-
-        const command = this.commands.get(action);
-        if (command) {
-            const player = this.playerManager.getPlayer(socket.id);
-            gameLogger.debug(
-                { player: player?.character.name, command: action, args },
-                'Command executed'
-            );
-            command.execute(socket, args, this);
-        } else {
-            socket.emit('message', "Unknown command.");
-        }
+        this.commandRegistry.execute(socket, commandString, this);
     }
 
     move(socket: Socket, direction: string): void {
@@ -223,10 +140,10 @@ export class GameManager {
 
         const nextRoomId = currentRoom.exits[direction];
         const oldRoomId = player.roomId;
-        this.broadcastToRoom(oldRoomId, `${player.character.name} leaves ${direction}.`, socket.id);
+        this.worldService.broadcastToRoom(oldRoomId, `${player.character.name} leaves ${direction}.`, socket.id);
 
         player.roomId = nextRoomId;
-        this.broadcastToRoom(nextRoomId, `${player.character.name} arrives from the ${this.getOppositeDirection(direction)}.`, socket.id);
+        this.worldService.broadcastToRoom(nextRoomId, `${player.character.name} arrives from the ${this.getOppositeDirection(direction)}.`, socket.id);
         this.look(socket);
         this.saveGame();
     }
@@ -261,101 +178,13 @@ export class GameManager {
             players: otherPlayers,
             items: room.items, // Use room.items
             ghosts: ghostDescs,
-            minimap: this.getMinimap(player)
+            minimap: this.worldService.getMinimap(player)
         };
 
         socket.emit('roomData', description);
         this.sendStats(socket);
     }
 
-    getMinimap(player: Player): string {
-        const range = 7;
-        const pRoom = this.roomManager.getRoom(player.roomId)!;
-        const px = pRoom.x;
-        const py = pRoom.y;
-
-        let mapStr = "";
-
-        for (let y = py - range; y <= py + range; y++) {
-            let line1 = "";
-            let line2 = "";
-
-            for (let x = px - range; x <= px + range; x++) {
-                const room = Object.values(this.roomManager.getAllRooms()).find(r => r.x === x && r.y === y);
-
-                // Check if current room has exits to this cell (for showing unexplored exits)
-                const roomAboveIsPlayer = (y === py - 1) && (x === px);
-                const roomBelowIsPlayer = (y === py + 1) && (x === px);
-                const roomToLeftIsPlayer = (y === py) && (x === px - 1);
-                const roomToRightIsPlayer = (y === py) && (x === px + 1);
-                const showNorthExitFromPlayer = roomAboveIsPlayer && pRoom.exits['north'];
-                const showSouthExitFromPlayer = roomBelowIsPlayer && pRoom.exits['south'];
-                const showWestExitFromPlayer = roomToLeftIsPlayer && pRoom.exits['west'];
-                const showEastExitFromPlayer = roomToRightIsPlayer && pRoom.exits['east'];
-
-                // Only show room if player has explored it OR it's adjacent to player with an exit
-                if (room && player.exploredRooms.has(room.id)) {
-                    let symbol = "   ";
-                    if (room.id === player.roomId) {
-                        symbol = " * ";
-                    } else {
-                        const others = this.playerManager.getAllPlayers().filter(p => p.roomId === room.id && p.id !== player.id);
-                        if (others.length > 0) {
-                            symbol = " P ";
-                        } else {
-                            symbol = "[ ]";
-                        }
-                    }
-
-                    // Determine which exits to show
-                    let showEastExit = false;
-                    let showSouthExit = false;
-
-                    if (room.id === player.roomId) {
-                        // Current room: show ALL exits (even to unexplored rooms)
-                        showEastExit = !!room.exits['east'];
-                        showSouthExit = !!room.exits['south'];
-                    } else {
-                        // Other explored room: only show exits to explored rooms
-                        if (room.exits['east']) {
-                            const eastRoom = this.roomManager.getRoom(room.exits['east']);
-                            showEastExit = !!eastRoom && player.exploredRooms.has(eastRoom.id);
-                        }
-                        if (room.exits['south']) {
-                            const southRoom = this.roomManager.getRoom(room.exits['south']);
-                            showSouthExit = !!southRoom && player.exploredRooms.has(southRoom.id);
-                        }
-                    }
-
-                    // Override with exits from player room to unexplored areas
-                    if (showEastExitFromPlayer) showEastExit = true;
-                    if (showSouthExitFromPlayer) showSouthExit = true;
-                    if (showWestExitFromPlayer) showEastExit = true;  // West exits show as east connection from left cell
-                    if (showNorthExitFromPlayer) showSouthExit = true;  // North exits show as south connection from above cell
-
-                    const east = showEastExit ? "-" : " ";
-                    line1 += symbol + east;
-
-                    const south = showSouthExit ? " | " : "   ";
-                    line2 += south + " ";
-                } else {
-                    // Unexplored or no room - but check if we should show exits from player room
-                    let symbol = "   ";
-                    let showEastExit = showWestExitFromPlayer || showEastExitFromPlayer;
-                    let showSouthExit = showNorthExitFromPlayer || showSouthExitFromPlayer;
-
-                    const east = showEastExit ? "-" : " ";
-                    line1 += symbol + east;
-
-                    const south = showSouthExit ? " | " : "   ";
-                    line2 += south + " ";
-                }
-            }
-            mapStr += line1 + "\n" + line2 + "\n";
-        }
-
-        return mapStr;
-    }
 
     /**
      * Execute a room operation with queueing to prevent race conditions
@@ -403,7 +232,7 @@ export class GameManager {
                 player.inventory.items.push(item);
                 socket.emit('message', `You picked up ${item.name}.`);
                 socket.emit('updateInventory', player.inventory);
-                this.broadcastToRoom(roomId, `${player.character.name} picks up ${item.name}.`, socket.id);
+                this.worldService.broadcastToRoom(roomId, `${player.character.name} picks up ${item.name}.`, socket.id);
                 this.look(socket);
             } else {
                 socket.emit('message', "You don't see that here.");
@@ -428,7 +257,7 @@ export class GameManager {
                 player.inventory.coins += amount;
                 socket.emit('message', `You collected ${amount} coins.`);
                 socket.emit('updateInventory', player.inventory);
-                this.broadcastToRoom(roomId, `${player.character.name} collects some coins.`, socket.id);
+                this.worldService.broadcastToRoom(roomId, `${player.character.name} collects some coins.`, socket.id);
                 this.look(socket);
             } else {
                 socket.emit('message', "There are no coins here.");
@@ -453,7 +282,7 @@ export class GameManager {
                 room.coins += amount;
                 socket.emit('message', `You dropped ${amount} coins.`);
                 socket.emit('updateInventory', player.inventory);
-                this.broadcastToRoom(roomId, `${player.character.name} drops some coins.`, socket.id);
+                this.worldService.broadcastToRoom(roomId, `${player.character.name} drops some coins.`, socket.id);
                 this.look(socket);
             } else {
                 socket.emit('message', "You have no coins to drop.");
@@ -485,7 +314,7 @@ export class GameManager {
         }
 
         const sanitized = sanitizeInput(message);
-        this.broadcastToRoom(player.roomId, `${player.character.name} says: "${sanitized}"`, socket.id);
+        this.worldService.broadcastToRoom(player.roomId, `${player.character.name} says: "${sanitized}"`, socket.id);
         socket.emit('message', `You say: "${sanitized}"`);
     }
 
@@ -499,7 +328,7 @@ export class GameManager {
         }
 
         const sanitized = sanitizeInput(action);
-        this.broadcastToRoom(player.roomId, `${player.character.name} ${sanitized}`, socket.id);
+        this.worldService.broadcastToRoom(player.roomId, `${player.character.name} ${sanitized}`, socket.id);
         socket.emit('message', `You ${sanitized}`);
     }
 
@@ -520,13 +349,6 @@ export class GameManager {
         socket.emit('message', `DEBUG: Room ${room.id} at ${room.x},${room.y}`);
     }
 
-    broadcastToRoom(roomId: string, message: string, excludeSocketId?: string): void {
-        for (const player of this.playerManager.getAllPlayers()) {
-            if (player.roomId === roomId && player.id !== excludeSocketId) {
-                this.io.to(player.id).emit('message', message);
-            }
-        }
-    }
 
     startGhostLoop(): void {
         this.ghostManager.spawnInitialGhosts(this.worldData.starting_room);
@@ -550,32 +372,16 @@ export class GameManager {
             if (room.locks && room.locks[dir]) continue;
 
             const nextRoomId = room.exits[dir];
-            this.broadcastToRoom(ghost.roomId, `${ghost.name} floats ${dir}.`);
+            this.worldService.broadcastToRoom(ghost.roomId, `${ghost.name} floats ${dir}.`);
 
             this.ghostManager.moveGhost(ghost, exits, (direction: string) =>
                 this.roomManager.getExitRoomId(ghost.roomId, direction)
             );
 
-            this.broadcastToRoom(nextRoomId, `${ghost.name} floats in from the ${this.getOppositeDirection(dir)}.`);
+            this.worldService.broadcastToRoom(nextRoomId, `${ghost.name} floats in from the ${this.getOppositeDirection(dir)}.`);
         }
     }
 
-    getRandomRoomId(): string {
-        return this.roomManager.getRandomRoomId();
-    }
-
-    getNearbyRoomId(startingRoomId: string): string {
-        const startRoom = this.roomManager.getRoom(startingRoomId);
-        if (!startRoom) return this.getRandomRoomId();
-
-        // Get all exits from starting room
-        const exits = Object.values(startRoom.exits);
-        if (exits.length === 0) return this.getRandomRoomId();
-
-        // Pick a random adjacent room
-        const randomExit = exits[Math.floor(Math.random() * exits.length)];
-        return randomExit;
-    }
 
     sendStats(socket: Socket): void {
         const player = this.playerManager.getPlayer(socket.id);

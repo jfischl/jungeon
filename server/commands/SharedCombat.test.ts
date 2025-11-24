@@ -334,7 +334,7 @@ describe('Shared Ghost Combat (Phase 2)', () => {
 
         // Manually test the respawn logic (same as AttackCommand line 118-123)
         ghost.hp = ghost.maxHp;
-        ghost.roomId = gameManager.getRandomRoomId();
+        ghost.roomId = gameManager.worldService.getRandomRoomId();
         ghost.combatants = new Set(); // This is what we're testing
 
         // Verify combatants were reset

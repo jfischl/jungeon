@@ -31,7 +31,14 @@ describe('Ghost Movement Edge Cases', () => {
         mockSocket.emit.mockClear();
     });
 
+    afterEach(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+    });
+
     it('should allow re-attacking ghost after it moves to different room', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         if (gameManager.ghostManager.getAllGhosts().length > 0) {
@@ -74,10 +81,16 @@ describe('Ghost Movement Edge Cases', () => {
             );
 
             expect(hasEngageMessage).toBe(true);
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
     it('should clean up combat state when ghost leaves room', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         if (gameManager.ghostManager.getAllGhosts().length > 0) {
@@ -103,10 +116,16 @@ describe('Ghost Movement Edge Cases', () => {
             );
 
             expect(hasNotFoundMessage).toBe(true);
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
     it('should reset player combat state when ghost is no longer in combatants list', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         if (gameManager.ghostManager.getAllGhosts().length > 0) {
@@ -122,6 +141,10 @@ describe('Ghost Movement Edge Cases', () => {
 
             // Should now be properly added to combatants
             expect(ghost.combatants.has(player.id)).toBe(true);
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 });

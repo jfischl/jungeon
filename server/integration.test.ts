@@ -31,10 +31,17 @@ describe('Jungeon Integration', () => {
         });
     });
 
-    afterAll(() => {
-        io.close();
+    afterAll((done) => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+
+        // Close Socket.IO and HTTP server properly
         clientSocket.close();
-        httpServer.close();
+        io.close(() => {
+            httpServer.close(() => {
+                done();
+            });
+        });
     });
 
     test('full login and look flow', (done) => {
@@ -73,5 +80,26 @@ describe('Jungeon Integration', () => {
                 clientSocket.emit('command', 'say Hello');
             }, 100);
         });
+    });
+
+    test('first ghost spawns near starting room', () => {
+        const ghosts = gameManager.ghostManager.getAllGhosts();
+        expect(ghosts.length).toBeGreaterThanOrEqual(5); // Should have at least 5 ghosts
+
+        const startingRoomId = gameManager.worldData.starting_room;
+        const startingRoom = gameManager.roomManager.getRoom(startingRoomId);
+        expect(startingRoom).toBeDefined();
+
+        // Get the adjacent rooms to the starting room
+        const adjacentRooms = Object.values(startingRoom!.exits);
+        expect(adjacentRooms.length).toBeGreaterThan(0);
+
+        // First ghost should be in one of the adjacent rooms
+        const firstGhost = ghosts[0];
+        expect(adjacentRooms).toContain(firstGhost.roomId);
+
+        // Other ghosts can be anywhere
+        const otherGhosts = ghosts.slice(1);
+        expect(otherGhosts.length).toBeGreaterThan(0);
     });
 });

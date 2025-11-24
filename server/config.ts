@@ -48,7 +48,9 @@ export const CONFIG = {
         DEFAULT_SPAWNS: [
             { name: "Hooded Figure", desc: "A mysterious figure in dark robes.", hp: 40, maxHp: 40, attack: 12, defense: 5, goldReward: 20 },
             { name: "Skeleton Knight", desc: "An undead warrior with rusted armor.", hp: 45, maxHp: 45, attack: 15, defense: 8, goldReward: 25 },
-            { name: "The Chain Rattler", desc: "Covered in heavy iron chains.", hp: 50, maxHp: 50, attack: 18, defense: 3, goldReward: 30 }
+            { name: "The Chain Rattler", desc: "Covered in heavy iron chains.", hp: 50, maxHp: 50, attack: 18, defense: 3, goldReward: 30 },
+            { name: "Shadow Lurker", desc: "A dark shape that seems to absorb light.", hp: 35, maxHp: 35, attack: 10, defense: 6, goldReward: 18 },
+            { name: "Wandering Wraith", desc: "A ghostly apparition that floats above the ground.", hp: 42, maxHp: 42, attack: 14, defense: 4, goldReward: 22 }
         ]
     },
 

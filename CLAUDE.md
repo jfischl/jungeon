@@ -131,6 +131,67 @@ Integration tests cover:
 
 Tests use mock Socket.IO and in-memory game state.
 
+### Fake Timers in Tests
+
+**IMPORTANT:** Tests that execute commands which create `setTimeout` calls MUST use fake timers to prevent open handles and worker warnings.
+
+Commands that create pending timers:
+- `AttackCommand.execute()` - Creates 1500ms setTimeout for ghost counter-attack
+- `ChallengeCommand.execute()` - Creates 15-second setTimeout for challenge expiration
+- Ghost death - Triggers `scheduleRespawn()` with 5-minute setTimeout
+
+**Required pattern for tests calling these commands:**
+
+```typescript
+it('test description', () => {
+    jest.useFakeTimers();
+
+    // Test setup
+    const player = gameManager.playerManager.getPlayer(mockSocket.id);
+
+    // Execute command that creates setTimeout
+    attackCommand.execute(mockSocket, 'ghost', gameManager);
+
+    // Assertions
+    expect(player.inCombat).toBe(true);
+
+    // CRITICAL: Flush all pending timers before test ends
+    jest.runAllTimers();
+    jest.useRealTimers();
+});
+```
+
+**DO NOT use fake timers for:**
+- Tests that don't call commands creating timers
+- Tests that only set up state without executing commands
+- Tests using `done` callbacks for async operations (convert to fake timers instead)
+
+**Cleanup:**
+- All test files already have `afterEach(() => gameManager.ghostManager.stopMovementLoop())` to prevent ghost movement interval leaks
+- Always call `jest.useRealTimers()` at the end of each test using fake timers
+
+### localStorage Warning (Expected and Harmless)
+
+When running tests, you will see this warning:
+```
+(node:XXXXX) Warning: `--localstorage-file` was provided without a valid path
+```
+
+**This warning is expected and harmless.** Here's why:
+
+1. **Root Cause**: Socket.IO client (used in integration tests) needs `localStorage` API
+2. **Node.js v18+ behavior**: Has built-in `localStorage` that expects `--localstorage-file` CLI flag
+3. **Jest cleanup phase**: When Jest tears down test environment, it accesses `global.localStorage`, triggering Node's internal webstorage getter which emits this warning
+4. **Our mock**: `jest.setup.js` provides a working `localStorage` implementation for tests, but cannot prevent Jest from accessing Node's internal property during cleanup
+
+**Why jsdom environment doesn't work:**
+- This is a **server-side Node.js application** (not a browser app)
+- The jsdom environment lacks Node.js globals like `TextEncoder`, `Buffer`, etc.
+- Switching to jsdom breaks all server tests with `TextEncoder is not defined` errors
+- The jsdom solution is only for browser-based applications (React, Vue, etc.)
+
+**Resolution**: Accept the warning as cosmetic. All tests pass successfully and the warning has no functional impact.
+
 ## Important Notes
 
 - The project uses CommonJS (`"type": "commonjs"` in package.json)

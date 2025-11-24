@@ -52,8 +52,7 @@ export class CombatManager {
      * Handle player death
      */
     handleDeath(deadPlayer: Player, killer: Player | null, game: GameManager): void {
-        const socket = Array.from(game.players.entries())
-            .find(([_, p]) => p.id === deadPlayer.id)?.[0];
+        const socket = game.playerManager.getSocketId(deadPlayer.id);
 
         if (!socket) return;
 
@@ -69,8 +68,7 @@ export class CombatManager {
             killer.inventory.coins += goldLoss;
             killer.experience += CONFIG.DEATH.PVP_XP_REWARD;
 
-            const killerSocket = Array.from(game.players.entries())
-                .find(([_, p]) => p.id === killer.id)?.[0];
+            const killerSocket = game.playerManager.getSocketId(killer.id);
 
             if (killerSocket) {
                 game.io.to(killerSocket).emit('message',
@@ -106,6 +104,9 @@ export class CombatManager {
         deadPlayer.inCombat = false;
         deadPlayer.combatTarget = null;
         deadPlayer.experience = Math.max(0, deadPlayer.experience - CONFIG.DEATH.XP_LOSS);
+
+        // Remove player from all ghost combatant lists
+        game.ghostManager.removePlayerFromAllCombat(deadPlayer.id);
 
         // Notify player
         game.io.to(socket).emit('message',

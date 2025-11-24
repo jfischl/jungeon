@@ -48,7 +48,10 @@ export class GameManager {
         // Initialize managers
         this.playerManager = new PlayerManager();
         this.roomManager = new RoomManager();
-        this.ghostManager = new GhostManager(() => this.getRandomRoomId());
+        this.ghostManager = new GhostManager(
+            () => this.getRandomRoomId(),
+            (startingRoomId) => this.getNearbyRoomId(startingRoomId)
+        );
 
         this.worldData = { starting_room: '', rooms: {} };
         this.characters = [];
@@ -358,7 +361,7 @@ export class GameManager {
     }
 
     getMinimap(player: Player): string {
-        const range = 2;
+        const range = 7;
         const pRoom = this.roomManager.getRoom(player.roomId)!;
         const px = pRoom.x;
         const py = pRoom.y;
@@ -525,7 +528,9 @@ export class GameManager {
     }
 
     startGhostLoop(): void {
-        this.ghostManager.spawnInitialGhosts();
+        this.ghostManager.spawnInitialGhosts(this.worldData.starting_room);
+        const ghosts = this.ghostManager.getAllGhosts();
+        gameLogger.info({ count: ghosts.length, ghosts: ghosts.map(g => ({ name: g.name, roomId: g.roomId })) }, 'Ghosts spawned');
         this.ghostManager.startMovementLoop(() => this.moveGhosts());
     }
 
@@ -556,6 +561,19 @@ export class GameManager {
 
     getRandomRoomId(): string {
         return this.roomManager.getRandomRoomId();
+    }
+
+    getNearbyRoomId(startingRoomId: string): string {
+        const startRoom = this.roomManager.getRoom(startingRoomId);
+        if (!startRoom) return this.getRandomRoomId();
+
+        // Get all exits from starting room
+        const exits = Object.values(startRoom.exits);
+        if (exits.length === 0) return this.getRandomRoomId();
+
+        // Pick a random adjacent room
+        const randomExit = exits[Math.floor(Math.random() * exits.length)];
+        return randomExit;
     }
 
     sendStats(socket: Socket): void {

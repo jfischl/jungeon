@@ -51,7 +51,14 @@ describe('Shared Ghost Combat (Phase 2)', () => {
         mockSocket2.emit.mockClear();
     });
 
+    afterEach(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+    });
+
     it('should track multiple combatants attacking same ghost', () => {
+        jest.useFakeTimers();
+
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
@@ -69,10 +76,20 @@ describe('Shared Ghost Combat (Phase 2)', () => {
             attackCommand.execute(mockSocket2, ghost.name.toLowerCase(), gameManager);
             expect(ghost.combatants.has(player2.id)).toBe(true);
             expect(ghost.combatants.size).toBe(2);
+
+            // Flush pending timers
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
-    it('should split rewards among all combatants when ghost dies', (done) => {
+    it('should split rewards among all combatants when ghost dies', () => {
+        jest.useFakeTimers();
+
+        // Mock Math.random to eliminate randomness in damage calculation
+        const mockRandom = jest.spyOn(Math, 'random').mockReturnValue(0.5);
+
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
         const ghost = gameManager.ghostManager.getAllGhosts()[0];
@@ -88,47 +105,57 @@ describe('Shared Ghost Combat (Phase 2)', () => {
         const expectedGoldEach = Math.floor(ghost.goldReward / 2);
         const expectedXpEach = Math.floor(40 / 2); // 40 is base XP for ghost
 
-        // Set ghost HP low enough to die on second hit, but survive first
-        ghost.hp = 30;
+        // Set up both players in combat BEFORE the killing blow
+        player1.inCombat = true;
+        player1.combatTarget = ghost.name;
+        ghost.combatants.add(player1.id);
 
-        // Player 1 attacks and engages
-        attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
-
-        // Player 2 also engages
         player2.inCombat = true;
         player2.combatTarget = ghost.name;
         ghost.combatants.add(player2.id);
 
-        // Set ghost HP very low so next attack kills it
-        ghost.hp = 5;
+        // Boost player attack to guarantee ghost dies
+        player1.attack = 1000;
 
-        // Player 1 deals killing blow
-        setTimeout(() => {
-            attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
+        // Set ghost to 1 HP to ensure it dies on next attack
+        ghost.hp = 1;
 
-            // VERIFY: Both players should receive EQUAL shares
-            const goldGained1 = player1.inventory.coins - initialCoins1;
-            const goldGained2 = player2.inventory.coins - initialCoins2;
-            const xpGained1 = player1.experience - initialXp1;
-            const xpGained2 = player2.experience - initialXp2;
+        // Execute killing blow - this triggers reward distribution
+        attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
 
-            // Both should get the same amount
-            expect(goldGained1).toBe(expectedGoldEach);
-            expect(goldGained2).toBe(expectedGoldEach);
-            expect(xpGained1).toBe(expectedXpEach);
-            expect(xpGained2).toBe(expectedXpEach);
+        // VERIFY: Both players should receive EQUAL shares
+        const goldGained1 = player1.inventory.coins - initialCoins1;
+        const goldGained2 = player2.inventory.coins - initialCoins2;
+        const xpGained1 = player1.experience - initialXp1;
+        const xpGained2 = player2.experience - initialXp2;
 
-            // Verify total rewards add up to ghost's full reward
-            expect(goldGained1 + goldGained2).toBeLessThanOrEqual(ghost.goldReward);
+        // Both should get the same amount
+        expect(goldGained1).toBe(expectedGoldEach);
+        expect(goldGained2).toBe(expectedGoldEach);
+        expect(xpGained1).toBe(expectedXpEach);
+        expect(xpGained2).toBe(expectedXpEach);
 
-            // Both should be out of combat
-            expect(player1.inCombat).toBe(false);
-            expect(player2.inCombat).toBe(false);
-            done();
-        }, 100);
+        // Verify total rewards add up to ghost's full reward
+        expect(goldGained1 + goldGained2).toBeLessThanOrEqual(ghost.goldReward);
+
+        // Both should be out of combat
+        expect(player1.inCombat).toBe(false);
+        expect(player2.inCombat).toBe(false);
+
+        // Flush pending timers
+        jest.runAllTimers();
+
+        // Clean up mocks
+        mockRandom.mockRestore();
+        jest.useRealTimers();
     });
 
-    it('should split rewards fairly among 3 players', (done) => {
+    it('should split rewards fairly among 3 players', () => {
+        jest.useFakeTimers();
+
+        // Mock Math.random to eliminate randomness in damage calculation
+        const mockRandom = jest.spyOn(Math, 'random').mockReturnValue(0.5);
+
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
@@ -151,37 +178,65 @@ describe('Shared Ghost Combat (Phase 2)', () => {
         const initialCoins1 = player1.inventory.coins;
         const initialCoins2 = player2.inventory.coins;
         const initialCoins3 = player3.inventory.coins;
+        const initialXp1 = player1.experience;
+        const initialXp2 = player2.experience;
+        const initialXp3 = player3.experience;
 
         const expectedGoldEach = Math.floor(ghost.goldReward / 3);
+        const expectedXpEach = Math.floor(40 / 3); // 40 is base XP for ghost
 
-        // Set ghost HP high enough to survive first attack
-        ghost.hp = 30;
+        // Set up all three players in combat consistently
+        player1.inCombat = true;
+        player1.combatTarget = ghost.name;
+        ghost.combatants.add(player1.id);
 
-        // All three engage
-        attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
         player2.inCombat = true;
         player2.combatTarget = ghost.name;
         ghost.combatants.add(player2.id);
+
         player3.inCombat = true;
         player3.combatTarget = ghost.name;
         ghost.combatants.add(player3.id);
 
-        // Set ghost HP low so next attack kills it
-        ghost.hp = 5;
+        // Boost player attack to guarantee ghost dies (ghost has maxHp from config)
+        player1.attack = 1000; // Guaranteed kill
 
-        // Kill ghost
-        setTimeout(() => {
-            attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
+        // Set ghost to 1 HP to ensure it dies on next attack
+        ghost.hp = 1;
 
-            // All three should get equal shares
-            expect(player1.inventory.coins - initialCoins1).toBe(expectedGoldEach);
-            expect(player2.inventory.coins - initialCoins2).toBe(expectedGoldEach);
-            expect(player3.inventory.coins - initialCoins3).toBe(expectedGoldEach);
-            done();
-        }, 100);
+        // Execute killing blow - this triggers reward distribution
+        attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
+
+        // All three should get equal shares
+        expect(player1.inventory.coins - initialCoins1).toBe(expectedGoldEach);
+        expect(player2.inventory.coins - initialCoins2).toBe(expectedGoldEach);
+        expect(player3.inventory.coins - initialCoins3).toBe(expectedGoldEach);
+
+        // Verify XP distribution
+        expect(player1.experience - initialXp1).toBe(expectedXpEach);
+        expect(player2.experience - initialXp2).toBe(expectedXpEach);
+        expect(player3.experience - initialXp3).toBe(expectedXpEach);
+
+        // All should be out of combat after ghost death
+        expect(player1.inCombat).toBe(false);
+        expect(player2.inCombat).toBe(false);
+        expect(player3.inCombat).toBe(false);
+
+        // Ghost should be removed from the game
+        const remainingGhosts = gameManager.ghostManager.getAllGhosts();
+        expect(remainingGhosts).not.toContain(ghost);
+
+        // Flush pending timers
+        jest.runAllTimers();
+
+        // Clean up mocks
+        mockRandom.mockRestore();
+        jest.useRealTimers();
     });
 
-    it('should attack all combatants in room during counter-attack', (done) => {
+    it('should attack all combatants in room during counter-attack', () => {
+        jest.useFakeTimers();
+
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
         const ghost = gameManager.ghostManager.getAllGhosts()[0];
@@ -197,16 +252,19 @@ describe('Shared Ghost Combat (Phase 2)', () => {
         attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
         attackCommand.execute(mockSocket2, ghost.name.toLowerCase(), gameManager);
 
-        // Wait for counter-attack (1500ms delay in AttackCommand)
-        setTimeout(() => {
-            // Both players should have taken damage
-            expect(player1.hp).toBeLessThan(initialHp1);
-            expect(player2.hp).toBeLessThan(initialHp2);
-            done();
-        }, 2000);
+        // Fast-forward time to trigger ghost counter-attack
+        jest.runAllTimers();
+
+        // Both players should have taken damage
+        expect(player1.hp).toBeLessThan(initialHp1);
+        expect(player2.hp).toBeLessThan(initialHp2);
+
+        jest.useRealTimers();
     });
 
     it('should notify player of other combatants when joining fight', () => {
+        jest.useFakeTimers();
+
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
@@ -232,10 +290,17 @@ describe('Shared Ghost Combat (Phase 2)', () => {
             );
 
             expect(hasOtherCombatantMessage).toBe(true);
+
+            // Flush pending timers
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
-    it('should remove player from combatants list on death', (done) => {
+    it('should remove player from combatants list on death', () => {
+        jest.useFakeTimers();
+
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
         const ghost = gameManager.ghostManager.getAllGhosts()[0];
 
@@ -245,11 +310,12 @@ describe('Shared Ghost Combat (Phase 2)', () => {
 
         attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
 
-        // Wait for counter-attack to kill player
-        setTimeout(() => {
-            expect(ghost.combatants.has(player1.id)).toBe(false);
-            done();
-        }, 2000);
+        // Fast-forward time to trigger ghost counter-attack
+        jest.runAllTimers();
+
+        expect(ghost.combatants.has(player1.id)).toBe(false);
+
+        jest.useRealTimers();
     });
 
     it('should reset combatants when ghost respawns', () => {

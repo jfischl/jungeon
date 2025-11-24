@@ -114,6 +114,11 @@ describe('Minimap', () => {
         }];
     });
 
+    afterEach(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+    });
+
     test('minimap is generated and not empty when player has explored rooms', () => {
         // Login player
         gameManager.handleLogin(mockSocket, 'warrior');

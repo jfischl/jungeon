@@ -20,21 +20,33 @@ export class GhostManager {
     private ghosts: Ghost[];
     private moveInterval?: NodeJS.Timeout;
     private getRandomRoomId: () => string;
+    private getNearbyRoomId?: (startingRoomId: string) => string;
 
-    constructor(getRandomRoomIdFn: () => string) {
+    constructor(getRandomRoomIdFn: () => string, getNearbyRoomIdFn?: (startingRoomId: string) => string) {
         this.ghosts = [];
         this.getRandomRoomId = getRandomRoomIdFn;
+        this.getNearbyRoomId = getNearbyRoomIdFn;
     }
 
     /**
      * Spawn initial ghosts from config
      */
-    spawnInitialGhosts(): void {
-        this.ghosts = CONFIG.GHOSTS.DEFAULT_SPAWNS.map(spawn => ({
-            ...spawn,
-            roomId: this.getRandomRoomId(),
-            combatants: new Set<string>()
-        }));
+    spawnInitialGhosts(startingRoomId?: string): void {
+        this.ghosts = CONFIG.GHOSTS.DEFAULT_SPAWNS.map((spawn, index) => {
+            // Spawn first ghost near starting room if available
+            let roomId: string;
+            if (index === 0 && startingRoomId && this.getNearbyRoomId) {
+                roomId = this.getNearbyRoomId(startingRoomId);
+            } else {
+                roomId = this.getRandomRoomId();
+            }
+
+            return {
+                ...spawn,
+                roomId,
+                combatants: new Set<string>()
+            };
+        });
     }
 
     /**

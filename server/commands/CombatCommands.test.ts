@@ -37,6 +37,11 @@ describe('Combat Commands Integration Tests', () => {
         mockSocket.emit.mockClear();
     });
 
+    afterEach(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+    });
+
     describe('FleeCommand', () => {
         it('should not allow flee when not in combat', () => {
             const player = gameManager.playerManager.getPlayer(mockSocket.id);

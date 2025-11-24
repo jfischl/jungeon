@@ -46,6 +46,8 @@ describe('Command Integration', () => {
     });
 
     afterAll(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        game.ghostManager.stopMovementLoop();
         io.close();
         clientSocket.close();
         httpServer.close();

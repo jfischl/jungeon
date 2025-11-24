@@ -28,6 +28,11 @@ describe('CombatManager Unit Tests', () => {
         mockIo.sockets.sockets.set(mockSocket.id, mockSocket);
     });
 
+    afterEach(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+    });
+
     describe('calculateDamage', () => {
         it('should calculate damage based on attack and defense', () => {
             const attacker = {

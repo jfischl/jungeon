@@ -36,6 +36,11 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
         mockSocket.emit.mockClear();
     });
 
+    afterEach(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+    });
+
     it('should require a target argument', () => {
         attackCommand.execute(mockSocket, '', gameManager);
 
@@ -55,6 +60,8 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
     });
 
     it('should initiate combat with ghost in same room', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         // Place a ghost in player's room
@@ -71,10 +78,16 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
                 'message',
                 expect.stringContaining('engage')
             );
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
     it('should deal damage to ghost', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         if (gameManager.ghostManager.getAllGhosts().length > 0) {
@@ -90,10 +103,16 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
                 'message',
                 expect.stringContaining('damage')
             );
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
     it('should allow multi-turn combat', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         if (gameManager.ghostManager.getAllGhosts().length > 0) {
@@ -117,10 +136,16 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
                 'message',
                 expect.stringContaining('attack')
             );
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
     it('should reward player when ghost is defeated', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         if (gameManager.ghostManager.getAllGhosts().length > 0) {
@@ -138,10 +163,16 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
             expect(player.inventory.coins).toBeGreaterThan(initialCoins);
             expect(player.experience).toBeGreaterThan(initialXp);
             expect(player.inCombat).toBe(false);
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
-    it('should handle player taking damage from ghost', (done) => {
+    it('should handle player taking damage from ghost', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         if (gameManager.ghostManager.getAllGhosts().length > 0) {
@@ -154,18 +185,19 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
 
             attackCommand.execute(mockSocket, ghost.name.toLowerCase(), gameManager);
 
-            // Wait for ghost counter-attack (1.5s delay in code)
-            setTimeout(() => {
-                // Player should have taken damage
-                expect(player.hp).toBeLessThan(initialPlayerHp);
-                done();
-            }, 2000);
-        } else {
-            done();
+            // Fast-forward time to trigger ghost counter-attack
+            jest.runAllTimers();
+
+            // Player should have taken damage
+            expect(player.hp).toBeLessThan(initialPlayerHp);
         }
+
+        jest.useRealTimers();
     });
 
     it('should prevent attacking ghost not in same room', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         if (gameManager.ghostManager.getAllGhosts().length > 0) {
@@ -178,10 +210,16 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
                 'message',
                 expect.stringContaining('don\'t see')
             );
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
     it('should not allow combat when already in combat', () => {
+        jest.useFakeTimers();
+
         const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
         // Set player in combat with something else
@@ -197,7 +235,11 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
 
             // Either continues combat or says already in combat
             expect(mockSocket.emit).toHaveBeenCalled();
+
+            jest.runAllTimers();
         }
+
+        jest.useRealTimers();
     });
 
     it('should level up player when enough XP gained', () => {

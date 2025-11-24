@@ -80,6 +80,11 @@ describe('GameManager', () => {
         gameManager.characters = [{ id: 'warrior', name: 'Warrior', description: 'Strong', baseHp: 100, baseAttack: 15, baseDefense: 10 }];
     });
 
+    afterEach(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+    });
+
     test('handleLogin adds player to starting room', () => {
         gameManager.handleLogin(mockSocket, 'warrior');
 
@@ -133,5 +138,50 @@ describe('GameManager', () => {
         const player = gameManager.playerManager.getPlayer('socket1')!;
         expect(player.inventory.coins).toBe(0);
         expect(gameManager.roomManager.getRoom('room_a')!.coins).toBe(5);
+    });
+
+    describe('getNearbyRoomId', () => {
+        test('should return a room ID from exits of starting room', () => {
+            const nearbyRoomId = gameManager.getNearbyRoomId('room_a');
+
+            // room_a has only one exit: north -> room_b
+            expect(nearbyRoomId).toBe('room_b');
+        });
+
+        test('should return random exit when multiple exits exist', () => {
+            const nearbyRoomId = gameManager.getNearbyRoomId('room_b');
+
+            // room_b has exits to room_a and room_c
+            expect(['room_a', 'room_c']).toContain(nearbyRoomId);
+        });
+
+        test('should return random room when starting room does not exist', () => {
+            const nearbyRoomId = gameManager.getNearbyRoomId('nonexistent_room');
+
+            // Should fallback to random room selection
+            expect(nearbyRoomId).toBeDefined();
+            expect(['room_a', 'room_b', 'room_c']).toContain(nearbyRoomId);
+        });
+
+        test('should return random room when starting room has no exits', () => {
+            // Create a room with no exits
+            gameManager.worldData.rooms['isolated_room'] = {
+                id: 'isolated_room',
+                name: 'Isolated Room',
+                description: 'A room with no exits',
+                exits: {},
+                coins: 0,
+                items: [],
+                locks: {},
+                x: 2, y: 2
+            };
+            gameManager.roomManager.loadWorldData(gameManager.worldData);
+
+            const nearbyRoomId = gameManager.getNearbyRoomId('isolated_room');
+
+            // Should fallback to random room selection
+            expect(nearbyRoomId).toBeDefined();
+            expect(['room_a', 'room_b', 'room_c', 'isolated_room']).toContain(nearbyRoomId);
+        });
     });
 });

@@ -37,6 +37,63 @@ describe('GhostManager Unit Tests', () => {
                 expect(ghost.roomId).toBeTruthy();
             });
         });
+
+        it('should spawn first ghost near starting room when getNearbyRoomId is provided', () => {
+            const nearbyRoomId = 'nearby-room-123';
+            const getNearbyRoomId = jest.fn(() => nearbyRoomId);
+            const getRandomRoomMock = jest.fn(() => 'random-room-' + Math.random());
+
+            const managerWithNearby = new GhostManager(getRandomRoomMock, getNearbyRoomId);
+            managerWithNearby.spawnInitialGhosts('starting-room');
+
+            const ghosts = managerWithNearby.getAllGhosts();
+            expect(ghosts.length).toBeGreaterThan(0);
+
+            // First ghost should spawn near starting room
+            expect(ghosts[0].roomId).toBe(nearbyRoomId);
+            expect(getNearbyRoomId).toHaveBeenCalledWith('starting-room');
+
+            // Subsequent ghosts should spawn randomly
+            if (ghosts.length > 1) {
+                ghosts.slice(1).forEach(ghost => {
+                    expect(ghost.roomId).toContain('random-room-');
+                });
+            }
+        });
+
+        it('should spawn all ghosts randomly when getNearbyRoomId is not provided', () => {
+            const getRandomRoomMock = jest.fn(() => 'random-room-' + Math.random());
+            const managerWithoutNearby = new GhostManager(getRandomRoomMock);
+
+            managerWithoutNearby.spawnInitialGhosts('starting-room');
+
+            const ghosts = managerWithoutNearby.getAllGhosts();
+            expect(ghosts.length).toBeGreaterThan(0);
+
+            // All ghosts should spawn randomly
+            expect(getRandomRoomMock).toHaveBeenCalledTimes(ghosts.length);
+            ghosts.forEach(ghost => {
+                expect(ghost.roomId).toContain('random-room-');
+            });
+        });
+
+        it('should spawn all ghosts randomly when startingRoomId is not provided', () => {
+            const nearbyRoomId = 'nearby-room-123';
+            const getNearbyRoomId = jest.fn(() => nearbyRoomId);
+            const getRandomRoomMock = jest.fn(() => 'random-room-' + Math.random());
+
+            const managerWithNearby = new GhostManager(getRandomRoomMock, getNearbyRoomId);
+            managerWithNearby.spawnInitialGhosts(); // No starting room provided
+
+            const ghosts = managerWithNearby.getAllGhosts();
+            expect(ghosts.length).toBeGreaterThan(0);
+
+            // All ghosts should spawn randomly (getNearbyRoomId should not be called)
+            expect(getNearbyRoomId).not.toHaveBeenCalled();
+            ghosts.forEach(ghost => {
+                expect(ghost.roomId).toContain('random-room-');
+            });
+        });
     });
 
     describe('getGhostsInRoom', () => {

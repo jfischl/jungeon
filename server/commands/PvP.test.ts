@@ -60,7 +60,14 @@ describe('PvP System Integration Tests', () => {
         mockSocket2.emit.mockClear();
     });
 
+    afterEach(() => {
+        // Clean up ghost movement interval to prevent Jest warning
+        gameManager.ghostManager.stopMovementLoop();
+    });
+
     it('should allow challenging another player', () => {
+        jest.useFakeTimers();
+
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
         challengeCommand.execute(mockSocket1, player2.character.name.toLowerCase(), gameManager);
@@ -75,6 +82,9 @@ describe('PvP System Integration Tests', () => {
             'message',
             expect.stringContaining('challenged you')
         );
+
+        jest.runAllTimers();
+        jest.useRealTimers();
     });
 
     it('should not allow challenging newbie players', () => {
@@ -117,6 +127,8 @@ describe('PvP System Integration Tests', () => {
     });
 
     it('should allow PvP combat after acceptance', () => {
+        jest.useFakeTimers();
+
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
@@ -135,9 +147,14 @@ describe('PvP System Integration Tests', () => {
             'message',
             expect.stringContaining('You attack')
         );
+
+        jest.runAllTimers();
+        jest.useRealTimers();
     });
 
     it('should not allow PvP attack without challenge', () => {
+        jest.useFakeTimers();
+
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
         attackCommand.execute(mockSocket1, player2.character.name.toLowerCase(), gameManager);
@@ -146,9 +163,14 @@ describe('PvP System Integration Tests', () => {
             'message',
             expect.stringContaining('must challenge')
         );
+
+        jest.runAllTimers();
+        jest.useRealTimers();
     });
 
     it('should transfer gold on PvP death', () => {
+        jest.useFakeTimers();
+
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
         const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
@@ -170,5 +192,8 @@ describe('PvP System Integration Tests', () => {
         expect(player1.inventory.coins).toBe(initialGold1 + 30); // Gained 30%
 
         expect(player1.inCombat).toBe(false);
+
+        jest.runAllTimers();
+        jest.useRealTimers();
     });
 });

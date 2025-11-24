@@ -32,10 +32,10 @@ describe('Ghost Movement Edge Cases', () => {
     });
 
     it('should allow re-attacking ghost after it moves to different room', () => {
-        const player = gameManager.players.get(mockSocket.id);
+        const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
-        if (gameManager.ghosts.length > 0) {
-            const ghost = gameManager.ghosts[0];
+        if (gameManager.ghostManager.getAllGhosts().length > 0) {
+            const ghost = gameManager.ghostManager.getAllGhosts()[0];
             ghost.roomId = player.roomId;
 
             // Player attacks ghost
@@ -44,7 +44,8 @@ describe('Ghost Movement Edge Cases', () => {
             expect(player.combatTarget).toBe(ghost.name);
 
             // Ghost moves to different room (simulating wandering)
-            const newRoomId = Object.keys(gameManager.rooms)[1];
+            const allRooms = gameManager.roomManager.getAllRooms();
+            const newRoomId = allRooms.length > 1 ? allRooms[1].id : 'different_room';
             ghost.roomId = newRoomId;
 
             // Player's combat state should be stale now since ghost left
@@ -77,10 +78,10 @@ describe('Ghost Movement Edge Cases', () => {
     });
 
     it('should clean up combat state when ghost leaves room', () => {
-        const player = gameManager.players.get(mockSocket.id);
+        const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
-        if (gameManager.ghosts.length > 0) {
-            const ghost = gameManager.ghosts[0];
+        if (gameManager.ghostManager.getAllGhosts().length > 0) {
+            const ghost = gameManager.ghostManager.getAllGhosts()[0];
             ghost.roomId = player.roomId;
             ghost.combatants.add(player.id);
 
@@ -106,10 +107,10 @@ describe('Ghost Movement Edge Cases', () => {
     });
 
     it('should reset player combat state when ghost is no longer in combatants list', () => {
-        const player = gameManager.players.get(mockSocket.id);
+        const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
-        if (gameManager.ghosts.length > 0) {
-            const ghost = gameManager.ghosts[0];
+        if (gameManager.ghostManager.getAllGhosts().length > 0) {
+            const ghost = gameManager.ghostManager.getAllGhosts()[0];
             ghost.roomId = player.roomId;
 
             // Set player in combat but NOT in ghost's combatants (stale state)

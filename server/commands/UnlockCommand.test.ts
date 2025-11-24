@@ -79,11 +79,18 @@ describe('UnlockCommand', () => {
         };
 
         mockGame = {
-            players: new Map([[mockSocket.id, testPlayer]]),
-            rooms: {
-                'room_1': currentRoom,
-                'room_2': northRoom,
-                'room_3': southRoom
+            playerManager: {
+                getPlayer: (id: string) => id === mockSocket.id ? testPlayer : undefined
+            },
+            roomManager: {
+                getRoom: (id: string) => {
+                    const rooms: Record<string, Room> = {
+                        'room_1': currentRoom,
+                        'room_2': northRoom,
+                        'room_3': southRoom
+                    };
+                    return rooms[id];
+                }
             },
             getOppositeDirection: (dir: string) => {
                 if (dir === 'north') return 'south';
@@ -103,8 +110,8 @@ describe('UnlockCommand', () => {
             'message',
             'You unlock the north door with the Ornate Bronze Key.'
         );
-        expect(mockGame.rooms['room_1'].locks['north']).toBeUndefined();
-        expect(mockGame.rooms['room_2'].locks['south']).toBeUndefined();
+        expect(mockGame.roomManager.getRoom('room_1')!.locks['north']).toBeUndefined();
+        expect(mockGame.roomManager.getRoom('room_2')!.locks['south']).toBeUndefined();
         expect(mockGame.saveGame).toHaveBeenCalled();
     });
 
@@ -137,7 +144,7 @@ describe('UnlockCommand', () => {
 
     it('should handle missing key', () => {
         // Remove the key from inventory
-        const player = mockGame.players.get(mockSocket.id);
+        const player = mockGame.playerManager.getPlayer(mockSocket.id);
         player.inventory.items = [];
 
         command.execute(mockSocket, 'north', mockGame);
@@ -150,7 +157,7 @@ describe('UnlockCommand', () => {
 
     it('should handle wrong key', () => {
         // Give player a different key
-        const player = mockGame.players.get(mockSocket.id);
+        const player = mockGame.playerManager.getPlayer(mockSocket.id);
         player.inventory.items = [{
             id: 'key_1',
             name: 'Wrong Key',

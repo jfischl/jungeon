@@ -5,7 +5,7 @@ import { CONFIG } from '../config';
 
 export class HealCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
-        const player = game.players.get(socket.id)!;
+        const player = game.playerManager.getPlayer(socket.id)!;
 
         // Check for healing potion in inventory
         const potionIndex = player.inventory.items.findIndex(item =>

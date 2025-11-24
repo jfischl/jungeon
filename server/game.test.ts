@@ -76,14 +76,14 @@ describe('GameManager', () => {
                 }
             }
         };
-        gameManager.rooms = JSON.parse(JSON.stringify(gameManager.worldData.rooms)); // Deep copy for runtime state
+        gameManager.roomManager.loadWorldData(gameManager.worldData);
         gameManager.characters = [{ id: 'warrior', name: 'Warrior', description: 'Strong', baseHp: 100, baseAttack: 15, baseDefense: 10 }];
     });
 
     test('handleLogin adds player to starting room', () => {
         gameManager.handleLogin(mockSocket, 'warrior');
 
-        const player = gameManager.players.get('socket1');
+        const player = gameManager.playerManager.getPlayer('socket1');
         expect(player).toBeDefined();
         expect(player!.character.id).toBe('warrior');
         expect(player!.roomId).toBe('room_a');
@@ -96,7 +96,7 @@ describe('GameManager', () => {
         // Room A -> North -> Room B
         gameManager.move(mockSocket, 'north');
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
         expect(player.roomId).toBe('room_b');
     });
 
@@ -108,7 +108,7 @@ describe('GameManager', () => {
 
         gameManager.move(mockSocket, 'north'); // Invalid (Room B has South, East)
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
         expect(player.roomId).toBe('room_b'); // Still in room_b
         expect(mockSocket.emit).toHaveBeenCalledWith('message', "You can't go that way.");
     });
@@ -119,9 +119,9 @@ describe('GameManager', () => {
 
         gameManager.collect(mockSocket);
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
         expect(player.inventory.coins).toBe(5);
-        expect(gameManager.rooms['room_a'].coins).toBe(0);
+        expect(gameManager.roomManager.getRoom('room_a')!.coins).toBe(0);
     });
 
     test('drop removes coins from inventory', () => {
@@ -130,8 +130,8 @@ describe('GameManager', () => {
 
         gameManager.drop(mockSocket);
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
         expect(player.inventory.coins).toBe(0);
-        expect(gameManager.rooms['room_a'].coins).toBe(5);
+        expect(gameManager.roomManager.getRoom('room_a')!.coins).toBe(5);
     });
 });

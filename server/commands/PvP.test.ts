@@ -47,8 +47,8 @@ describe('PvP System Integration Tests', () => {
         gameManager.handleLogin(mockSocket2, 'rogue');
 
         // Put them in same room (NOT starting room to avoid safe zone)
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
         player1.roomId = 'room-2';
         player2.roomId = 'room-2';
 
@@ -61,7 +61,7 @@ describe('PvP System Integration Tests', () => {
     });
 
     it('should allow challenging another player', () => {
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
         challengeCommand.execute(mockSocket1, player2.character.name.toLowerCase(), gameManager);
 
@@ -78,7 +78,7 @@ describe('PvP System Integration Tests', () => {
     });
 
     it('should not allow challenging newbie players', () => {
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
         player2.level = 1; // Newbie
 
         challengeCommand.execute(mockSocket1, player2.character.name.toLowerCase(), gameManager);
@@ -91,8 +91,8 @@ describe('PvP System Integration Tests', () => {
     });
 
     it('should allow accepting a challenge', () => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
         // Setup challenge
         const challengeId = `${mockSocket1.id}-${mockSocket2.id}`;
@@ -117,8 +117,8 @@ describe('PvP System Integration Tests', () => {
     });
 
     it('should allow PvP combat after acceptance', () => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
         // Setup active combat
         player1.inCombat = true;
@@ -138,7 +138,7 @@ describe('PvP System Integration Tests', () => {
     });
 
     it('should not allow PvP attack without challenge', () => {
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
         attackCommand.execute(mockSocket1, player2.character.name.toLowerCase(), gameManager);
 
@@ -149,8 +149,8 @@ describe('PvP System Integration Tests', () => {
     });
 
     it('should transfer gold on PvP death', () => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
         // Setup active combat
         player1.inCombat = true;

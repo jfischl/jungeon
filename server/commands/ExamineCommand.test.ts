@@ -64,8 +64,12 @@ describe('ExamineCommand', () => {
 
         // Mock game manager
         mockGame = {
-            players: new Map([[mockSocket.id, testPlayer]]),
-            rooms: { 'room_1': testRoom }
+            playerManager: {
+                getPlayer: (id: string) => id === mockSocket.id ? testPlayer : undefined
+            },
+            roomManager: {
+                getRoom: (id: string) => id === 'room_1' ? testRoom : undefined
+            }
         };
     });
 
@@ -103,7 +107,7 @@ describe('ExamineCommand', () => {
             name: 'Ornate Bronze Key',
             description: 'A heavy bronze key engraved with twisted vines and thorns.'
         };
-        mockGame.rooms['room_1'].items.push(duplicateKey);
+        mockGame.roomManager.getRoom('room_1')!.items.push(duplicateKey);
 
         command.execute(mockSocket, 'bronze', mockGame);
 

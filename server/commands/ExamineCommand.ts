@@ -9,7 +9,7 @@ export class ExamineCommand implements Command {
             return;
         }
 
-        const player = game.players.get(socket.id)!;
+        const player = game.playerManager.getPlayer(socket.id)!;
         const itemName = args.toLowerCase().trim();
 
         // Check inventory first
@@ -24,7 +24,7 @@ export class ExamineCommand implements Command {
         }
 
         // Check current room
-        const room = game.rooms[player.roomId];
+        const room = game.roomManager.getRoom(player.roomId)!;
         const roomItem = room.items.find(i =>
             i.name.toLowerCase().includes(itemName) ||
             i.id.toLowerCase().includes(itemName)

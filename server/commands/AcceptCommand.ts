@@ -4,7 +4,7 @@ import { GameManager } from '../game';
 
 export class AcceptCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
-        const acceptor = game.players.get(socket.id)!;
+        const acceptor = game.playerManager.getPlayer(socket.id)!;
 
         // Find pending challenge where this player is the target
         // We look for any challenge where targetId matches acceptor.id
@@ -17,7 +17,7 @@ export class AcceptCommand implements Command {
         }
 
         const [challengeId, data] = challengeEntry;
-        const challenger = game.players.get(data.challengerId);
+        const challenger = game.playerManager.getPlayer(data.challengerId);
 
         if (!challenger) {
             socket.emit('message', "The challenger is no longer available.");

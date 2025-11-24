@@ -28,16 +28,12 @@ import { gameLogger, playerLogger } from './logger';
 
 export class GameManager {
     io: Server;
-    // Legacy properties for backward compatibility
-    players: Map<string, Player>;
-    rooms: Record<string, Room>;
-    ghosts: Ghost[];
     worldData: WorldData;
 
     // Entity managers
-    private playerManager: PlayerManager;
-    private roomManager: RoomManager;
-    private ghostManager: GhostManager;
+    playerManager: PlayerManager;
+    roomManager: RoomManager;
+    ghostManager: GhostManager;
 
     characters: Character[];
     combatManager: CombatManager;
@@ -53,44 +49,6 @@ export class GameManager {
         this.playerManager = new PlayerManager();
         this.roomManager = new RoomManager();
         this.ghostManager = new GhostManager(() => this.getRandomRoomId());
-
-        // Legacy properties - proxy to managers
-        const playerMap = new Map<string, Player>();
-        this.players = new Proxy(playerMap, {
-            get: (target, prop) => {
-                if (prop === 'get') return (id: string) => this.playerManager.getPlayer(id);
-                if (prop === 'set') return (id: string, player: Player) => {
-                    this.playerManager.addPlayer(id, player);
-                    return this.players;
-                };
-                if (prop === 'has') return (id: string) => this.playerManager.hasPlayer(id);
-                if (prop === 'delete') return (id: string) => this.playerManager.removePlayer(id);
-                if (prop === 'values') return () => this.playerManager.getAllPlayers().values();
-                if (prop === 'entries') return () => {
-                    const players = this.playerManager.getAllPlayers();
-                    return players.map(p => [p.id, p] as [string, Player])[Symbol.iterator]();
-                };
-                if (prop === Symbol.iterator) return () => {
-                    const players = this.playerManager.getAllPlayers();
-                    return players.map(p => [p.id, p] as [string, Player])[Symbol.iterator]();
-                };
-                return Reflect.get(target, prop, target);
-            }
-        });
-
-        this.rooms = new Proxy({}, {
-            get: (target, prop: string) => this.roomManager.getRoom(prop)
-        }) as Record<string, Room>;
-
-        this.ghosts = new Proxy([], {
-            get: (target, prop) => {
-                const ghosts = this.ghostManager.getAllGhosts();
-                if (typeof prop === 'string' && !isNaN(Number(prop))) {
-                    return ghosts[Number(prop)];
-                }
-                return (ghosts as any)[prop];
-            }
-        }) as Ghost[];
 
         this.worldData = { starting_room: '', rooms: {} };
         this.characters = [];
@@ -188,14 +146,14 @@ export class GameManager {
         playerLogger.info({ socketId: socket.id }, 'Player connected');
 
         socket.on('disconnect', () => {
-            if (this.players.has(socket.id)) {
-                const player = this.players.get(socket.id)!;
+            if (this.playerManager.hasPlayer(socket.id)) {
+                const player = this.playerManager.getPlayer(socket.id)!;
                 playerLogger.info(
                     { socketId: socket.id, character: player.character.name },
                     'Player disconnected'
                 );
                 this.broadcastToRoom(player.roomId, `${player.character.name} has disconnected.`, socket.id);
-                this.players.delete(socket.id);
+                this.playerManager.removePlayer(socket.id);
                 this.saveGame();
             }
         });
@@ -215,7 +173,7 @@ export class GameManager {
     }
 
     handleLogin(socket: Socket, charId: string): void {
-        if (this.players.has(socket.id)) return;
+        if (this.playerManager.hasPlayer(socket.id)) return;
 
         // Sanitize character ID
         const sanitizedCharId = sanitizeInput(charId, 50);
@@ -230,7 +188,7 @@ export class GameManager {
             return;
         }
 
-        const isTaken = Array.from(this.players.values()).some(p => p.character.id === sanitizedCharId);
+        const isTaken = this.playerManager.getAllPlayers().some(p => p.character.id === sanitizedCharId);
         if (isTaken) {
             playerLogger.debug(
                 { socketId: socket.id, character: char.name },
@@ -248,7 +206,7 @@ export class GameManager {
 
         const savedPlayers = this.repository.loadPlayers() as Record<string, { roomId: string; inventory: Inventory; exploredRooms?: string[] }> | null;
         if (savedPlayers && savedPlayers[charId]) {
-            if (this.rooms[savedPlayers[charId].roomId]) {
+            if (this.roomManager.getRoom(savedPlayers[charId].roomId)) {
                 roomId = savedPlayers[charId].roomId;
             }
             inventory = savedPlayers[charId].inventory;
@@ -276,7 +234,7 @@ export class GameManager {
             isDefending: false
         };
 
-        this.players.set(socket.id, player);
+        this.playerManager.addPlayer(socket.id, player);
 
         playerLogger.info(
             {
@@ -296,12 +254,12 @@ export class GameManager {
     }
 
     handleCommand(socket: Socket, commandString: string): void {
-        if (!this.players.has(socket.id)) return;
+        if (!this.playerManager.hasPlayer(socket.id)) return;
 
         // Validate input
         const validation = validateCommandInput(commandString);
         if (!validation.valid) {
-            const player = this.players.get(socket.id);
+            const player = this.playerManager.getPlayer(socket.id);
             gameLogger.warn(
                 {
                     player: player?.character.name,
@@ -319,7 +277,7 @@ export class GameManager {
 
         const command = this.commands.get(action);
         if (command) {
-            const player = this.players.get(socket.id);
+            const player = this.playerManager.getPlayer(socket.id);
             gameLogger.debug(
                 { player: player?.character.name, command: action, args },
                 'Command executed'
@@ -331,8 +289,8 @@ export class GameManager {
     }
 
     move(socket: Socket, direction: string): void {
-        const player = this.players.get(socket.id)!;
-        const currentRoom = this.rooms[player.roomId];
+        const player = this.playerManager.getPlayer(socket.id)!;
+        const currentRoom = this.roomManager.getRoom(player.roomId)!;
 
         if (!currentRoom.exits[direction]) {
             socket.emit('message', "You can't go that way.");
@@ -371,17 +329,17 @@ export class GameManager {
     }
 
     look(socket: Socket): void {
-        const player = this.players.get(socket.id)!;
-        const room = this.rooms[player.roomId];
+        const player = this.playerManager.getPlayer(socket.id)!;
+        const room = this.roomManager.getRoom(player.roomId)!;
 
         // Track exploration
         player.exploredRooms.add(player.roomId);
 
-        const otherPlayers = Array.from(this.players.values())
+        const otherPlayers = this.playerManager.getAllPlayers()
             .filter(p => p.roomId === player.roomId && p.id !== socket.id)
             .map(p => p.character.name);
 
-        const ghostsHere = this.ghosts.filter(g => g.roomId === player.roomId);
+        const ghostsHere = this.ghostManager.getAllGhosts().filter(g => g.roomId === player.roomId);
         const ghostDescs = ghostsHere.map(g => `${g.name} is here. ${g.desc}`);
 
         const description: RoomDataPacket = {
@@ -401,7 +359,7 @@ export class GameManager {
 
     getMinimap(player: Player): string {
         const range = 7;
-        const pRoom = this.rooms[player.roomId];
+        const pRoom = this.roomManager.getRoom(player.roomId)!;
         const px = pRoom.x;
         const py = pRoom.y;
 
@@ -420,7 +378,7 @@ export class GameManager {
                     if (room.id === player.roomId) {
                         symbol = " * ";
                     } else {
-                        const others = Array.from(this.players.values()).filter(p => p.roomId === room.id && p.id !== player.id);
+                        const others = this.playerManager.getAllPlayers().filter(p => p.roomId === room.id && p.id !== player.id);
                         if (others.length > 0) {
                             symbol = " P ";
                         } else {
@@ -446,8 +404,8 @@ export class GameManager {
     }
 
     pickUpItem(socket: Socket, itemName: string): void {
-        const player = this.players.get(socket.id)!;
-        const room = this.rooms[player.roomId];
+        const player = this.playerManager.getPlayer(socket.id)!;
+        const room = this.roomManager.getRoom(player.roomId)!;
 
         const itemIndex = room.items.findIndex(i => i.name.toLowerCase().includes(itemName.toLowerCase())); // Use room.items
 
@@ -464,8 +422,8 @@ export class GameManager {
     }
 
     collect(socket: Socket): void {
-        const player = this.players.get(socket.id)!;
-        const room = this.rooms[player.roomId];
+        const player = this.playerManager.getPlayer(socket.id)!;
+        const room = this.roomManager.getRoom(player.roomId)!;
 
         if (room.coins > 0) {
             const amount = room.coins;
@@ -481,8 +439,8 @@ export class GameManager {
     }
 
     drop(socket: Socket): void {
-        const player = this.players.get(socket.id)!;
-        const room = this.rooms[player.roomId];
+        const player = this.playerManager.getPlayer(socket.id)!;
+        const room = this.roomManager.getRoom(player.roomId)!;
 
         if (player.inventory.coins > 0) {
             const amount = player.inventory.coins;
@@ -498,7 +456,7 @@ export class GameManager {
     }
 
     inventory(socket: Socket): void {
-        const player = this.players.get(socket.id)!;
+        const player = this.playerManager.getPlayer(socket.id)!;
         socket.emit('message', `Inventory: ${player.inventory.coins} coins.`);
         if (player.inventory.items.length > 0) {
             const names = player.inventory.items.map(i => i.name).join(', ');
@@ -509,7 +467,7 @@ export class GameManager {
     }
 
     say(socket: Socket, message: string): void {
-        const player = this.players.get(socket.id)!;
+        const player = this.playerManager.getPlayer(socket.id)!;
 
         // Validate message
         if (!isValidMessage(message)) {
@@ -523,7 +481,7 @@ export class GameManager {
     }
 
     emote(socket: Socket, action: string): void {
-        const player = this.players.get(socket.id)!;
+        const player = this.playerManager.getPlayer(socket.id)!;
 
         // Validate action
         if (!isValidMessage(action)) {
@@ -537,8 +495,8 @@ export class GameManager {
     }
 
     debug(socket: Socket): void {
-        const player = this.players.get(socket.id)!;
-        const room = this.rooms[player.roomId];
+        const player = this.playerManager.getPlayer(socket.id)!;
+        const room = this.roomManager.getRoom(player.roomId)!;
         gameLogger.debug(
             {
                 player: player.character.name,
@@ -554,15 +512,15 @@ export class GameManager {
     }
 
     broadcastToRoom(roomId: string, message: string, excludeSocketId?: string): void {
-        for (const [id, player] of this.players) {
-            if (player.roomId === roomId && id !== excludeSocketId) {
-                this.io.to(id).emit('message', message);
+        for (const player of this.playerManager.getAllPlayers()) {
+            if (player.roomId === roomId && player.id !== excludeSocketId) {
+                this.io.to(player.id).emit('message', message);
             }
         }
     }
 
     getAvailableCharacters(): Character[] {
-        const takenIds = Array.from(this.players.values()).map(p => p.character.id);
+        const takenIds = this.playerManager.getAllPlayers().map(p => p.character.id);
         return this.characters.filter(c => !takenIds.includes(c.id));
     }
 
@@ -601,7 +559,7 @@ export class GameManager {
     }
 
     sendStats(socket: Socket): void {
-        const player = this.players.get(socket.id);
+        const player = this.playerManager.getPlayer(socket.id);
         if (!player) return;
 
         socket.emit('updateStats', {

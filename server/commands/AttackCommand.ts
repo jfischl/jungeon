@@ -7,7 +7,7 @@ import { Ghost } from '../managers/GhostManager';
 
 export class AttackCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
-        const player = game.players.get(socket.id)!;
+        const player = game.playerManager.getPlayer(socket.id)!;
 
         if (!args || args.trim().length === 0) {
             socket.emit('message', "Attack who? Usage: attack <target>");
@@ -17,7 +17,7 @@ export class AttackCommand implements Command {
         const targetName = args.toLowerCase().trim();
 
         // Check for ghost targets
-        const ghost = game.ghosts.find(g =>
+        const ghost = game.ghostManager.getAllGhosts().find(g =>
             g.roomId === player.roomId &&
             g.name.toLowerCase().includes(targetName)
         );
@@ -28,7 +28,7 @@ export class AttackCommand implements Command {
         }
 
         // Check for player targets
-        const targetPlayer = Array.from(game.players.values()).find(p =>
+        const targetPlayer = game.playerManager.getAllPlayers().find(p =>
             p.roomId === player.roomId &&
             p.id !== player.id &&
             p.character.name.toLowerCase().includes(targetName)
@@ -83,7 +83,7 @@ export class AttackCommand implements Command {
 
                 // Reward all participants
                 combatantIds.forEach(playerId => {
-                    const participant = game.players.get(playerId as string);
+                    const participant = game.playerManager.getPlayer(playerId as string);
                     if (participant) {
                         participant.inventory.coins += goldPerPlayer;
 
@@ -112,18 +112,8 @@ export class AttackCommand implements Command {
                 game.broadcastToRoom(player.roomId, `${ghost.name} has been vanquished!`, '');
 
                 // Remove ghost and respawn elsewhere later
-                const ghostIndex = game.ghosts.indexOf(ghost);
-                if (ghostIndex !== -1) {
-                    game.ghosts.splice(ghostIndex, 1);
-
-                    // Respawn ghost after configured time
-                    setTimeout(() => {
-                        ghost.hp = ghost.maxHp;
-                        ghost.roomId = game.getRandomRoomId();
-                        ghost.combatants = new Set(); // Reset combatants
-                        game.ghosts.push(ghost);
-                    }, CONFIG.GHOSTS.RESPAWN_TIME_MS);
-                }
+                game.ghostManager.removeGhost(ghost);
+                game.ghostManager.scheduleRespawn(ghost);
 
                 game.saveGame();
                 return;
@@ -133,7 +123,7 @@ export class AttackCommand implements Command {
             setTimeout(() => {
                 if (ghost.hp > 0) {
                     const activeCombatants = Array.from(ghost.combatants)
-                        .map(id => game.players.get(id as string))
+                        .map(id => game.playerManager.getPlayer(id as string))
                         .filter(p => p && p.roomId === ghost.roomId && p.inCombat);
 
                     activeCombatants.forEach(combatant => {
@@ -184,7 +174,7 @@ export class AttackCommand implements Command {
             // Show other combatants if any
             const otherCombatants = Array.from(ghost.combatants)
                 .filter(id => id !== player.id)
-                .map(id => game.players.get(id as string)?.character.name)
+                .map(id => game.playerManager.getPlayer(id as string)?.character.name)
                 .filter(name => name);
 
             if (otherCombatants.length > 0) {

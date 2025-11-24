@@ -39,7 +39,7 @@ describe('Combat Commands Integration Tests', () => {
 
     describe('FleeCommand', () => {
         it('should not allow flee when not in combat', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inCombat = false;
 
             fleeCommand.execute(mockSocket, '', gameManager);
@@ -51,7 +51,7 @@ describe('Combat Commands Integration Tests', () => {
         });
 
         it('should successfully flee with 70% chance', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inCombat = true;
             player.combatTarget = 'Test Ghost';
 
@@ -69,7 +69,7 @@ describe('Combat Commands Integration Tests', () => {
         });
 
         it('should fail to flee and take damage', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inCombat = true;
             player.combatTarget = 'Test Ghost';
             const initialHp = player.hp;
@@ -88,7 +88,7 @@ describe('Combat Commands Integration Tests', () => {
         });
 
         it('should handle death on failed flee', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inCombat = true;
             player.combatTarget = 'Test Ghost';
             player.hp = 5; // Low HP
@@ -105,7 +105,7 @@ describe('Combat Commands Integration Tests', () => {
 
     describe('DefendCommand', () => {
         it('should not allow defend when not in combat', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inCombat = false;
 
             defendCommand.execute(mockSocket, '', gameManager);
@@ -117,7 +117,7 @@ describe('Combat Commands Integration Tests', () => {
         });
 
         it('should set defending flag when in combat', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inCombat = true;
             player.combatTarget = 'Test Ghost';
             player.isDefending = false;
@@ -134,7 +134,7 @@ describe('Combat Commands Integration Tests', () => {
 
     describe('HealCommand', () => {
         it('should not heal without potion', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inventory.items = [];
 
             healCommand.execute(mockSocket, '', gameManager);
@@ -146,7 +146,7 @@ describe('Combat Commands Integration Tests', () => {
         });
 
         it('should consume potion and restore HP', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.hp = 50;
             player.inventory.items = [{ name: 'Healing Potion', description: 'Restores HP' }];
 
@@ -161,7 +161,7 @@ describe('Combat Commands Integration Tests', () => {
         });
 
         it('should not exceed max HP', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.hp = player.maxHp - 10;
             player.inventory.items = [{ name: 'Healing Potion', description: '' }];
 
@@ -175,7 +175,7 @@ describe('Combat Commands Integration Tests', () => {
         });
 
         it('should update inventory UI after healing', () => {
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inventory.items = [{ name: 'Potion', description: '' }];
 
             healCommand.execute(mockSocket, '', gameManager);

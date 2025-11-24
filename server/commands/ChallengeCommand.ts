@@ -5,7 +5,7 @@ import { CONFIG } from '../config';
 
 export class ChallengeCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
-        const challenger = game.players.get(socket.id)!;
+        const challenger = game.playerManager.getPlayer(socket.id)!;
 
         if (!args || args.trim().length === 0) {
             socket.emit('message', "Challenge who? Usage: challenge <player>");
@@ -20,7 +20,7 @@ export class ChallengeCommand implements Command {
         const targetName = args.toLowerCase().trim();
 
         // Find target player in same room
-        const targetPlayer = Array.from(game.players.values()).find(p =>
+        const targetPlayer = game.playerManager.getAllPlayers().find(p =>
             p.roomId === challenger.roomId &&
             p.id !== challenger.id &&
             p.character.name.toLowerCase().includes(targetName)

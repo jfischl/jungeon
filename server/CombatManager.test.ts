@@ -165,7 +165,7 @@ describe('CombatManager Unit Tests', () => {
     describe('awardExperience', () => {
         it('should award XP without leveling', () => {
             gameManager.handleLogin(mockSocket, 'warrior');
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             const initialXp = player.experience;
 
             combatManager.awardExperience(player, 50, mockSocket);
@@ -176,7 +176,7 @@ describe('CombatManager Unit Tests', () => {
 
         it('should level up at 100 XP', () => {
             gameManager.handleLogin(mockSocket, 'warrior');
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.experience = 90;
             const initialMaxHp = player.maxHp;
             const initialAttack = player.attack;
@@ -197,7 +197,7 @@ describe('CombatManager Unit Tests', () => {
 
         it('should support multiple level ups', () => {
             gameManager.handleLogin(mockSocket, 'warrior');
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
 
             combatManager.awardExperience(player, 250, mockSocket);
 
@@ -208,7 +208,7 @@ describe('CombatManager Unit Tests', () => {
     describe('handleDeath', () => {
         it('should respawn player at starting room', () => {
             gameManager.handleLogin(mockSocket, 'warrior');
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.hp = 0;
             player.roomId = 'some_other_room';
 
@@ -221,7 +221,7 @@ describe('CombatManager Unit Tests', () => {
 
         it('should deduct 30% gold (capped at 50)', () => {
             gameManager.handleLogin(mockSocket, 'warrior');
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.inventory.coins = 200;
 
             combatManager.handleDeath(player, null, gameManager);
@@ -232,7 +232,7 @@ describe('CombatManager Unit Tests', () => {
 
         it('should deduct 25 XP on death', () => {
             gameManager.handleLogin(mockSocket, 'warrior');
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.experience = 50;
 
             combatManager.handleDeath(player, null, gameManager);
@@ -242,7 +242,7 @@ describe('CombatManager Unit Tests', () => {
 
         it('should not reduce XP below 0', () => {
             gameManager.handleLogin(mockSocket, 'warrior');
-            const player = gameManager.players.get(mockSocket.id);
+            const player = gameManager.playerManager.getPlayer(mockSocket.id);
             player.experience = 10;
 
             combatManager.handleDeath(player, null, gameManager);
@@ -252,7 +252,7 @@ describe('CombatManager Unit Tests', () => {
 
         it('should transfer gold to killer in PvP', () => {
             gameManager.handleLogin(mockSocket, 'warrior');
-            const deadPlayer = gameManager.players.get(mockSocket.id);
+            const deadPlayer = gameManager.playerManager.getPlayer(mockSocket.id);
             deadPlayer.inventory.coins = 100;
 
             const mockKillerSocket = {
@@ -261,7 +261,7 @@ describe('CombatManager Unit Tests', () => {
             };
             mockIo.sockets.sockets.set(mockKillerSocket.id, mockKillerSocket);
             gameManager.handleLogin(mockKillerSocket, 'rogue');
-            const killer = gameManager.players.get(mockKillerSocket.id);
+            const killer = gameManager.playerManager.getPlayer(mockKillerSocket.id);
             const initialKillerGold = killer.inventory.coins;
 
             combatManager.handleDeath(deadPlayer, killer, gameManager);

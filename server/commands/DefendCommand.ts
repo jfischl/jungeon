@@ -4,7 +4,7 @@ import { GameManager } from '../game';
 
 export class DefendCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
-        const player = game.players.get(socket.id)!;
+        const player = game.playerManager.getPlayer(socket.id)!;
 
         if (!player.inCombat) {
             socket.emit('message', "You're not in combat! Nothing to defend against.");

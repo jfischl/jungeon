@@ -19,8 +19,8 @@ export class UnlockCommand implements Command {
             return;
         }
 
-        const player = game.players.get(socket.id)!;
-        const room = game.rooms[player.roomId];
+        const player = game.playerManager.getPlayer(socket.id)!;
+        const room = game.roomManager.getRoom(player.roomId)!;
 
         if (!room.exits[fullDir]) {
             socket.emit('message', `There is no exit to the ${fullDir}.`);
@@ -42,7 +42,7 @@ export class UnlockCommand implements Command {
 
         // Unlock both sides
         delete room.locks[fullDir];
-        const nextRoom = game.rooms[room.exits[fullDir]];
+        const nextRoom = game.roomManager.getRoom(room.exits[fullDir])!;
         const oppDir = game.getOppositeDirection(fullDir);
         if (nextRoom.locks && nextRoom.locks[oppDir]) {
             delete nextRoom.locks[oppDir];

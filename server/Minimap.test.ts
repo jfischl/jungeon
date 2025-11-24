@@ -118,7 +118,7 @@ describe('Minimap', () => {
         // Login player
         gameManager.handleLogin(mockSocket, 'warrior');
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
         expect(player).toBeDefined();
 
         // Get the minimap
@@ -137,7 +137,7 @@ describe('Minimap', () => {
         // Login player
         gameManager.handleLogin(mockSocket, 'warrior');
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
 
         // Player starts at room_0_0, so only that should be explored
         expect(player.exploredRooms.has('room_0_0')).toBe(true);
@@ -158,7 +158,7 @@ describe('Minimap', () => {
         // Login player
         gameManager.handleLogin(mockSocket, 'warrior');
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
 
         // Move north
         gameManager.move(mockSocket, 'north');
@@ -185,7 +185,7 @@ describe('Minimap', () => {
         // Login player
         gameManager.handleLogin(mockSocket, 'warrior');
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
 
         // Move through multiple rooms: north, south, east
         gameManager.move(mockSocket, 'north');  // to room_0_1
@@ -214,7 +214,7 @@ describe('Minimap', () => {
         // Login player
         gameManager.handleLogin(mockSocket, 'warrior');
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
 
         // Player has only explored the starting room
         expect(player.exploredRooms.size).toBe(1);
@@ -234,7 +234,7 @@ describe('Minimap', () => {
         // Login player
         gameManager.handleLogin(mockSocket, 'warrior');
 
-        const player = gameManager.players.get('socket1')!;
+        const player = gameManager.playerManager.getPlayer('socket1')!;
 
         // Move to all four adjacent rooms to explore them
         gameManager.move(mockSocket, 'north');  // room_0_1

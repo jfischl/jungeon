@@ -52,11 +52,11 @@ describe('Shared Ghost Combat (Phase 2)', () => {
     });
 
     it('should track multiple combatants attacking same ghost', () => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
-        if (gameManager.ghosts.length > 0) {
-            const ghost = gameManager.ghosts[0];
+        if (gameManager.ghostManager.getAllGhosts().length > 0) {
+            const ghost = gameManager.ghostManager.getAllGhosts()[0];
             ghost.roomId = player1.roomId;
             player2.roomId = player1.roomId; // Put both in same room
 
@@ -73,9 +73,9 @@ describe('Shared Ghost Combat (Phase 2)', () => {
     });
 
     it('should split rewards among all combatants when ghost dies', (done) => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
-        const ghost = gameManager.ghosts[0];
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
+        const ghost = gameManager.ghostManager.getAllGhosts()[0];
 
         ghost.roomId = player1.roomId;
         player2.roomId = player1.roomId;
@@ -129,8 +129,8 @@ describe('Shared Ghost Combat (Phase 2)', () => {
     });
 
     it('should split rewards fairly among 3 players', (done) => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
         // Create third player
         const mockSocket3 = {
@@ -141,9 +141,9 @@ describe('Shared Ghost Combat (Phase 2)', () => {
         };
         mockIo.sockets.sockets.set(mockSocket3.id, mockSocket3);
         gameManager.handleLogin(mockSocket3, 'mage');
-        const player3 = gameManager.players.get(mockSocket3.id);
+        const player3 = gameManager.playerManager.getPlayer(mockSocket3.id);
 
-        const ghost = gameManager.ghosts[0];
+        const ghost = gameManager.ghostManager.getAllGhosts()[0];
         ghost.roomId = player1.roomId;
         player2.roomId = player1.roomId;
         player3.roomId = player1.roomId;
@@ -182,9 +182,9 @@ describe('Shared Ghost Combat (Phase 2)', () => {
     });
 
     it('should attack all combatants in room during counter-attack', (done) => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
-        const ghost = gameManager.ghosts[0];
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
+        const ghost = gameManager.ghostManager.getAllGhosts()[0];
 
         ghost.roomId = player1.roomId;
         player2.roomId = player1.roomId;
@@ -207,11 +207,11 @@ describe('Shared Ghost Combat (Phase 2)', () => {
     });
 
     it('should notify player of other combatants when joining fight', () => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const player2 = gameManager.players.get(mockSocket2.id);
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const player2 = gameManager.playerManager.getPlayer(mockSocket2.id);
 
-        if (gameManager.ghosts.length > 0) {
-            const ghost = gameManager.ghosts[0];
+        if (gameManager.ghostManager.getAllGhosts().length > 0) {
+            const ghost = gameManager.ghostManager.getAllGhosts()[0];
             ghost.roomId = player1.roomId;
             player2.roomId = player1.roomId;
             mockSocket2.emit.mockClear();
@@ -236,8 +236,8 @@ describe('Shared Ghost Combat (Phase 2)', () => {
     });
 
     it('should remove player from combatants list on death', (done) => {
-        const player1 = gameManager.players.get(mockSocket1.id);
-        const ghost = gameManager.ghosts[0];
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
+        const ghost = gameManager.ghostManager.getAllGhosts()[0];
 
         ghost.roomId = player1.roomId;
         ghost.attack = 100; // Very high attack to kill player
@@ -257,8 +257,8 @@ describe('Shared Ghost Combat (Phase 2)', () => {
         // We can't test the full 5-minute delay in unit tests, so we verify
         // that the respawn code correctly resets the combatants Set
 
-        const ghost = gameManager.ghosts[0];
-        const player1 = gameManager.players.get(mockSocket1.id);
+        const ghost = gameManager.ghostManager.getAllGhosts()[0];
+        const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);
 
         // Add player to ghost's combatants
         ghost.combatants.add(player1.id);

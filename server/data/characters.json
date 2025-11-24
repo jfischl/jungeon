@@ -1,0 +1,82 @@
+[
+    {
+        "id": "warrior",
+        "name": "Garreth the Strong",
+        "description": "A burly warrior with a scarred face and a heavy broadsword.",
+        "baseHp": 100,
+        "baseAttack": 18,
+        "baseDefense": 12
+    },
+    {
+        "id": "mage",
+        "name": "Elara the Wise",
+        "description": "A robed figure with eyes that crackle with arcane energy.",
+        "baseHp": 70,
+        "baseAttack": 22,
+        "baseDefense": 6
+    },
+    {
+        "id": "rogue",
+        "name": "Finn the Quick",
+        "description": "A shadowy figure, barely visible in the dim light. You check your pockets.",
+        "baseHp": 80,
+        "baseAttack": 20,
+        "baseDefense": 8
+    },
+    {
+        "id": "cleric",
+        "name": "Brother Thomas",
+        "description": "A kindly priest with a warm smile and a heavy mace.",
+        "baseHp": 90,
+        "baseAttack": 14,
+        "baseDefense": 10
+    },
+    {
+        "id": "bard",
+        "name": "Lila the Songbird",
+        "description": "She carries a lute and has a twinkle in her eye.",
+        "baseHp": 75,
+        "baseAttack": 16,
+        "baseDefense": 9
+    },
+    {
+        "id": "ranger",
+        "name": "Arin of the Woods",
+        "description": "Clad in green and brown, with a longbow slung over his shoulder.",
+        "baseHp": 85,
+        "baseAttack": 19,
+        "baseDefense": 7
+    },
+    {
+        "id": "paladin",
+        "name": "Sir Alistair",
+        "description": "His armor shines with a holy light. He looks very self-righteous.",
+        "baseHp": 95,
+        "baseAttack": 16,
+        "baseDefense": 14
+    },
+    {
+        "id": "barbarian",
+        "name": "Krog the Smasher",
+        "description": "He wears little armor and carries a massive axe. He looks angry.",
+        "baseHp": 110,
+        "baseAttack": 20,
+        "baseDefense": 5
+    },
+    {
+        "id": "monk",
+        "name": "Master Wu",
+        "description": "He stands perfectly still, yet looks ready to strike at any moment.",
+        "baseHp": 80,
+        "baseAttack": 17,
+        "baseDefense": 11
+    },
+    {
+        "id": "merchant",
+        "name": "Barnaby the Rich",
+        "description": "Dressed in fine silks, he looks out of place in a dungeon.",
+        "baseHp": 60,
+        "baseAttack": 10,
+        "baseDefense": 8
+    }
+]

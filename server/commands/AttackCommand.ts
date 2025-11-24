@@ -1,0 +1,208 @@
+import { Socket } from 'socket.io';
+import { Command } from './Command';
+import { GameManager } from '../game';
+
+export class AttackCommand implements Command {
+    execute(socket: Socket, args: string, game: GameManager): void {
+        const player = game.players.get(socket.id)!;
+
+        if (!args || args.trim().length === 0) {
+            socket.emit('message', "Attack who? Usage: attack <target>");
+            return;
+        }
+
+        const targetName = args.toLowerCase().trim();
+
+        // Check for ghost targets
+        const ghost = game.ghosts.find(g =>
+            g.roomId === player.roomId &&
+            g.name.toLowerCase().includes(targetName)
+        );
+
+        if (ghost) {
+            this.initiateGhostCombat(socket, player, ghost, game);
+            return;
+        }
+
+        // Check for player targets
+        const targetPlayer = Array.from(game.players.values()).find(p =>
+            p.roomId === player.roomId &&
+            p.id !== player.id &&
+            p.character.name.toLowerCase().includes(targetName)
+        );
+
+        if (targetPlayer) {
+            this.initiatePvPCombat(socket, player, targetPlayer, game);
+            return;
+        }
+
+        socket.emit('message', `You don't see "${args}" here.`);
+    }
+
+    private initiateGhostCombat(socket: Socket, player: any, ghost: any, game: GameManager): void {
+        // Add player to ghost's combatants if not already there
+        if (!ghost.combatants.has(player.id)) {
+            ghost.combatants.add(player.id);
+        }
+
+        // If already in combat with this ghost, continue attacking
+        if (player.inCombat && player.combatTarget === ghost.name) {
+            // Player attacks
+            const damage = game.combatManager.calculateDamage(player, {
+                attack: 0,
+                defense: ghost.defense,
+                hp: ghost.hp,
+                maxHp: ghost.maxHp,
+                level: 1,
+                experience: 0,
+                inCombat: false,
+                combatTarget: null,
+                id: '',
+                character: { id: '', name: '', description: '', baseHp: 0, baseAttack: 0, baseDefense: 0 },
+                roomId: '',
+                inventory: { coins: 0, items: [] },
+                exploredRooms: new Set(),
+                isDefending: false
+            });
+
+            ghost.hp -= damage;
+            const isCrit = damage > (player.attack - ghost.defense / 2 + 6); // Rough crit detection
+
+            socket.emit('message', `You attack ${ghost.name} for ${damage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`);
+            socket.emit('message', `${ghost.name}: ${ghost.hp}/${ghost.maxHp} HP`);
+            game.broadcastToRoom(player.roomId, `${player.character.name} attacks ${ghost.name}!`, socket.id);
+
+            if (ghost.hp <= 0) {
+                // Ghost defeated - distribute rewards to all combatants
+                const combatantIds = Array.from(ghost.combatants);
+                const goldPerPlayer = Math.floor(ghost.goldReward / combatantIds.length);
+                const xpPerPlayer = Math.floor(40 / combatantIds.length);
+
+                // Reward all participants
+                combatantIds.forEach(playerId => {
+                    const participant = game.players.get(playerId as string);
+                    if (participant) {
+                        participant.inventory.coins += goldPerPlayer;
+                        game.combatManager.awardExperience(participant, xpPerPlayer, socket);
+
+                        // Find socket for this participant
+                        const participantSocket = Array.from(game.io.sockets.sockets.values())
+                            .find(s => s.id === playerId);
+
+                        if (participantSocket) {
+                            participantSocket.emit('message', `💀 ${ghost.name} was defeated! You receive ${goldPerPlayer} coins and ${xpPerPlayer} XP!`);
+                            participantSocket.emit('updateInventory', participant.inventory);
+                            game.sendStats(participantSocket);
+                        }
+
+                        // End combat for this participant
+                        participant.inCombat = false;
+                        participant.combatTarget = null;
+                    }
+                });
+
+                game.broadcastToRoom(player.roomId, `${ghost.name} has been vanquished!`, '');
+
+                // Remove ghost and respawn elsewhere later
+                const ghostIndex = game.ghosts.indexOf(ghost);
+                if (ghostIndex !== -1) {
+                    game.ghosts.splice(ghostIndex, 1);
+
+                    // Respawn ghost after 5 minutes
+                    setTimeout(() => {
+                        ghost.hp = ghost.maxHp;
+                        ghost.roomId = game.getRandomRoomId();
+                        ghost.combatants = new Set(); // Reset combatants
+                        game.ghosts.push(ghost);
+                    }, 300000);
+                }
+
+                game.saveGame();
+                return;
+            }
+
+            // Ghost counter-attacks ALL combatants in room
+            setTimeout(() => {
+                if (ghost.hp > 0) {
+                    const activeCombatants = Array.from(ghost.combatants)
+                        .map(id => game.players.get(id as string))
+                        .filter(p => p && p.roomId === ghost.roomId && p.inCombat);
+
+                    activeCombatants.forEach(combatant => {
+                        if (!combatant) return;
+
+                        let ghostDamage = Math.floor(Math.random() * 8) + ghost.attack;
+
+                        // Check if player was defending
+                        if (combatant.isDefending) {
+                            ghostDamage = Math.floor(ghostDamage / 2);
+                            combatant.isDefending = false;
+                        }
+
+                        combatant.hp -= ghostDamage;
+
+                        const combatantSocket = Array.from(game.io.sockets.sockets.values())
+                            .find(s => s.id === combatant.id);
+
+                        if (combatantSocket) {
+                            if (combatant.isDefending) {
+                                combatantSocket.emit('message', `Your defense reduces the damage!`);
+                            }
+                            combatantSocket.emit('message', `${ghost.name} strikes you for ${ghostDamage} damage!`);
+                            combatantSocket.emit('message', `Your HP: ${combatant.hp}/${combatant.maxHp}`);
+                            game.sendStats(combatantSocket);
+
+                            if (combatant.hp <= 0) {
+                                ghost.combatants.delete(combatant.id); // Remove from combatants
+                                game.combatManager.handleDeath(combatant, null, game);
+                            } else {
+                                combatantSocket.emit('message', `Type 'attack ${ghost.name.split(' ')[0].toLowerCase()}' to continue fighting, 'defend' to brace, or 'flee' to escape!`);
+                            }
+                        }
+                    });
+
+                    game.saveGame();
+                }
+            }, 1500);
+
+        } else {
+            // Initiate new combat
+            player.inCombat = true;
+            player.combatTarget = ghost.name;
+
+            socket.emit('message', `⚔️  You engage ${ghost.name} in combat!`);
+
+            // Show other combatants if any
+            const otherCombatants = Array.from(ghost.combatants)
+                .filter(id => id !== player.id)
+                .map(id => game.players.get(id as string)?.character.name)
+                .filter(name => name);
+
+            if (otherCombatants.length > 0) {
+                socket.emit('message', `${otherCombatants.join(', ')} ${otherCombatants.length === 1 ? 'is' : 'are'} also fighting this ghost!`);
+            }
+
+            socket.emit('message', `${ghost.name}: ${ghost.hp}/${ghost.maxHp} HP`);
+            game.broadcastToRoom(player.roomId, `${player.character.name} engages ${ghost.name} in combat!`, socket.id);
+
+            // Trigger first attack
+            this.initiateGhostCombat(socket, player, ghost, game);
+        }
+    }
+
+    private initiatePvPCombat(socket: Socket, attacker: any, defender: any, game: GameManager): void {
+        // Check newbie protection
+        if (defender.level < 3) {
+            socket.emit('message', `${defender.character.name} has newbie protection (under level 3).`);
+            return;
+        }
+
+        // Check safe zone
+        if (attacker.roomId === game.worldData.starting_room) {
+            socket.emit('message', "Combat is not allowed in the starting room.");
+            return;
+        }
+
+        socket.emit('message', `PvP combat is not yet fully implemented. Coming soon!`);
+    }
+}

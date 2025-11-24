@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Room, Item, WorldData } from '../shared/types';
 import { CONFIG } from './config';
+import { serverLogger } from './logger';
 
 const NUM_ROOMS = CONFIG.MAP.ROOM_COUNT;
 const ROOM_NAMES: string[] = [
@@ -52,7 +53,7 @@ export class MapGenerator {
     }
 
     generate(): void {
-        console.log("Generating map...");
+        serverLogger.info({ roomCount: NUM_ROOMS }, 'Generating procedural map...');
         this.rooms = {};
         this.roomIds = [];
 
@@ -127,7 +128,7 @@ export class MapGenerator {
 
         // 4. Verify Solvability
         if (!this.isSolvable()) {
-            console.log("Map not solvable (unreachable rooms due to locks). Regenerating...");
+            serverLogger.warn('Map not solvable (unreachable rooms), regenerating...');
             this.generate(); // Recursive retry
             return;
         }
@@ -139,7 +140,16 @@ export class MapGenerator {
         };
 
         fs.writeFileSync(path.join(__dirname, 'data/world.json'), JSON.stringify(world, null, 2));
-        console.log("Map generated and saved to data/world.json");
+
+        // Count locks for logging
+        const lockCount = Object.values(this.rooms).reduce(
+            (count, room) => count + Object.keys(room.locks || {}).length,
+            0
+        );
+        serverLogger.info(
+            { roomCount: NUM_ROOMS, locks: lockCount },
+            'Map generated and saved successfully'
+        );
     }
 
     createRoom(x: number, y: number): string {
@@ -226,7 +236,10 @@ export class MapGenerator {
             }
         }
 
-        console.log(`Solvability check: ${visited.size}/${NUM_ROOMS} rooms reachable.`);
+        serverLogger.debug(
+            { reachableRooms: visited.size, totalRooms: NUM_ROOMS },
+            'Map solvability check'
+        );
         return visited.size === NUM_ROOMS;
     }
 

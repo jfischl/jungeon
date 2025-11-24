@@ -222,12 +222,20 @@ export class GameManager {
 
         const char = this.characters.find(c => c.id === sanitizedCharId);
         if (!char) {
+            playerLogger.warn(
+                { socketId: socket.id, attemptedCharId: sanitizedCharId },
+                'Login failed: invalid character'
+            );
             socket.emit('error', "Invalid character.");
             return;
         }
 
         const isTaken = Array.from(this.players.values()).some(p => p.character.id === sanitizedCharId);
         if (isTaken) {
+            playerLogger.debug(
+                { socketId: socket.id, character: char.name },
+                'Login failed: character already in use'
+            );
             socket.emit('error', "Character already taken.");
             socket.emit('updateCharacterList', this.getAvailableCharacters());
             return;
@@ -269,6 +277,17 @@ export class GameManager {
         };
 
         this.players.set(socket.id, player);
+
+        playerLogger.info(
+            {
+                socketId: socket.id,
+                character: player.character.name,
+                startingRoom: player.roomId,
+                returning: savedPlayers && savedPlayers[charId] ? true : false
+            },
+            'Player logged in'
+        );
+
         socket.emit('loginSuccess', { player, worldName: "The Jungeon" });
 
         this.broadcastToRoom(player.roomId, `${player.character.name} has entered the game.`, socket.id);
@@ -282,6 +301,15 @@ export class GameManager {
         // Validate input
         const validation = validateCommandInput(commandString);
         if (!validation.valid) {
+            const player = this.players.get(socket.id);
+            gameLogger.warn(
+                {
+                    player: player?.character.name,
+                    input: commandString.substring(0, 50),
+                    error: validation.error
+                },
+                'Invalid command input'
+            );
             socket.emit('error', validation.error || 'Invalid command');
             return;
         }
@@ -291,6 +319,11 @@ export class GameManager {
 
         const command = this.commands.get(action);
         if (command) {
+            const player = this.players.get(socket.id);
+            gameLogger.debug(
+                { player: player?.character.name, command: action, args },
+                'Command executed'
+            );
             command.execute(socket, args, this);
         } else {
             socket.emit('message', "Unknown command.");

@@ -297,10 +297,30 @@ export class GameManager {
                         }
                     }
 
-                    const east = room.exits['east'] ? "-" : " ";
+                    // Determine which exits to show
+                    let showEastExit = false;
+                    let showSouthExit = false;
+
+                    if (room.id === player.roomId) {
+                        // Current room: show ALL exits (even to unexplored rooms)
+                        showEastExit = !!room.exits['east'];
+                        showSouthExit = !!room.exits['south'];
+                    } else {
+                        // Other explored room: only show exits to explored rooms
+                        if (room.exits['east']) {
+                            const eastRoom = this.roomManager.getRoom(room.exits['east']);
+                            showEastExit = !!eastRoom && player.exploredRooms.has(eastRoom.id);
+                        }
+                        if (room.exits['south']) {
+                            const southRoom = this.roomManager.getRoom(room.exits['south']);
+                            showSouthExit = !!southRoom && player.exploredRooms.has(southRoom.id);
+                        }
+                    }
+
+                    const east = showEastExit ? "-" : " ";
                     line1 += symbol + east;
 
-                    const south = room.exits['south'] ? " | " : "   ";
+                    const south = showSouthExit ? " | " : "   ";
                     line2 += south + " ";
                 } else {
                     // Unexplored or no room - show blank

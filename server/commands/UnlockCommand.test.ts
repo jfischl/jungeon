@@ -24,12 +24,22 @@ describe('UnlockCommand', () => {
 
         const testPlayer: Player = {
             id: 'test-socket-id',
-            character: { id: 'warrior', name: 'Garreth', description: 'A warrior' },
+            character: { id: 'warrior', name: 'Garreth', description: 'A warrior', baseHp: 100, baseAttack: 15, baseDefense: 10 },
             roomId: 'room_1',
             inventory: {
                 coins: 10,
                 items: [testKey]
-            }
+            },
+            exploredRooms: new Set<string>(),
+            hp: 100,
+            maxHp: 100,
+            attack: 15,
+            defense: 10,
+            level: 1,
+            experience: 0,
+            inCombat: false,
+            combatTarget: null,
+            isDefending: false
         };
 
         const currentRoom: Room = {

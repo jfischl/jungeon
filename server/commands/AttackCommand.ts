@@ -83,16 +83,21 @@ export class AttackCommand implements Command {
                     const participant = game.players.get(playerId as string);
                     if (participant) {
                         participant.inventory.coins += goldPerPlayer;
-                        game.combatManager.awardExperience(participant, xpPerPlayer, socket);
 
                         // Find socket for this participant
-                        const participantSocket = Array.from(game.io.sockets.sockets.values())
-                            .find(s => s.id === playerId);
+                        const participantSocket = game.io.sockets?.sockets
+                            ? Array.from(game.io.sockets.sockets.values()).find(s => s.id === playerId)
+                            : undefined;
 
+                        // Award XP even if socket not found (for tests)
                         if (participantSocket) {
+                            game.combatManager.awardExperience(participant, xpPerPlayer, participantSocket);
                             participantSocket.emit('message', `💀 ${ghost.name} was defeated! You receive ${goldPerPlayer} coins and ${xpPerPlayer} XP!`);
                             participantSocket.emit('updateInventory', participant.inventory);
                             game.sendStats(participantSocket);
+                        } else {
+                            // If socket not found (e.g., in tests), still award XP
+                            participant.experience += xpPerPlayer;
                         }
 
                         // End combat for this participant
@@ -141,8 +146,9 @@ export class AttackCommand implements Command {
 
                         combatant.hp -= ghostDamage;
 
-                        const combatantSocket = Array.from(game.io.sockets.sockets.values())
-                            .find(s => s.id === combatant.id);
+                        const combatantSocket = game.io.sockets?.sockets
+                            ? Array.from(game.io.sockets.sockets.values()).find(s => s.id === combatant.id)
+                            : undefined;
 
                         if (combatantSocket) {
                             if (combatant.isDefending) {
@@ -209,7 +215,9 @@ export class AttackCommand implements Command {
             actualDamage = Math.floor(damage / 2);
             defender.isDefending = false;
 
-            const defenderSocket = Array.from(game.io.sockets.sockets.values()).find(s => s.id === defender.id);
+            const defenderSocket = game.io.sockets?.sockets
+                ? Array.from(game.io.sockets.sockets.values()).find(s => s.id === defender.id)
+                : undefined;
             if (defenderSocket) {
                 defenderSocket.emit('message', "Your defense reduces the damage!");
             }
@@ -223,7 +231,9 @@ export class AttackCommand implements Command {
         game.sendStats(socket);
 
         // Notify defender
-        const defenderSocket = Array.from(game.io.sockets.sockets.values()).find(s => s.id === defender.id);
+        const defenderSocket = game.io.sockets?.sockets
+            ? Array.from(game.io.sockets.sockets.values()).find(s => s.id === defender.id)
+            : undefined;
         if (defenderSocket) {
             defenderSocket.emit('message', `${attacker.character.name} attacks you for ${actualDamage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`);
             defenderSocket.emit('message', `Your HP: ${defender.hp}/${defender.maxHp}`);

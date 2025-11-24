@@ -77,7 +77,7 @@ describe('GameManager', () => {
             }
         };
         gameManager.rooms = JSON.parse(JSON.stringify(gameManager.worldData.rooms)); // Deep copy for runtime state
-        gameManager.characters = [{ id: 'warrior', name: 'Warrior', description: 'Strong' }];
+        gameManager.characters = [{ id: 'warrior', name: 'Warrior', description: 'Strong', baseHp: 100, baseAttack: 15, baseDefense: 10 }];
     });
 
     test('handleLogin adds player to starting room', () => {

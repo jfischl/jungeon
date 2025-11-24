@@ -100,6 +100,10 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
             gameManager.ghosts[0].roomId = player.roomId;
             const ghost = gameManager.ghosts[0];
 
+            // Set high HP to ensure ghost survives multiple attacks
+            ghost.hp = 100;
+            ghost.maxHp = 100;
+
             // First attack
             attackCommand.execute(mockSocket, ghost.name.toLowerCase(), gameManager);
             expect(player.inCombat).toBe(true);

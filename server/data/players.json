@@ -1,25 +1,23 @@
 {
   "warrior": {
-    "roomId": "room_-2_1_437",
+    "roomId": "room_0_0_94",
     "inventory": {
-      "coins": 120,
-      "items": [
-        {
-          "id": "map_11",
-          "name": "Tattered Map",
-          "description": "Shows a place you aren't in."
-        }
-      ]
+      "coins": 196,
+      "items": []
     },
     "exploredRooms": [
-      "room_0_0_119",
-      "room_-1_0_791",
-      "room_-2_0_669",
-      "room_0_-1_683",
-      "room_1_-1_641",
-      "room_1_-2_737",
-      "room_2_-2_278",
-      "room_-2_1_437"
+      "room_0_0_94",
+      "room_0_-1_48"
+    ]
+  },
+  "rogue": {
+    "roomId": "room_0_0_94",
+    "inventory": {
+      "coins": 44,
+      "items": []
+    },
+    "exploredRooms": [
+      "room_0_0_94"
     ]
   }
 }

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+	"Bash(*)",
+	"Edit(./**)",
+	"Read(./**)",
+	"Write(./**)",
+	"Create(./**)",
+	"Delete(./**)",
+	"Search(*)",
+	"WebFetch(*)",
+	"mcp__*(*)"
+    ],
+      "deny": [
+	  "Read(./.env)",
+	  "Read(./.env.*)",
+	  "Read(./secrets/**)",
+	  "Read(./config/secrets/**)",
+	  "Read(~/.ssh/**)",
+	  "Read(~/.aws/**)"
+      ],
+    "ask": []
+  }
+}

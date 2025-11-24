@@ -89,8 +89,8 @@ describe('Shared Ghost Combat (Phase 2)', () => {
             const expectedGoldEach = Math.floor(ghost.goldReward / 2);
             const expectedXpEach = Math.floor(40 / 2); // 40 is base XP for ghost
 
-            // Set ghost HP low
-            ghost.hp = 5;
+            // Set ghost HP low enough to die on second hit, but survive first
+            ghost.hp = 30;
 
             // Player 1 attacks and engages
             attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
@@ -99,6 +99,9 @@ describe('Shared Ghost Combat (Phase 2)', () => {
             player2.inCombat = true;
             player2.combatTarget = ghost.name;
             ghost.combatants.add(player2.id);
+
+            // Set ghost HP very low so next attack kills it
+            ghost.hp = 5;
 
             // Player 1 deals killing blow
             setTimeout(() => {
@@ -157,7 +160,8 @@ describe('Shared Ghost Combat (Phase 2)', () => {
 
             const expectedGoldEach = Math.floor(ghost.goldReward / 3);
 
-            ghost.hp = 5;
+            // Set ghost HP high enough to survive first attack
+            ghost.hp = 30;
 
             // All three engage
             attackCommand.execute(mockSocket1, ghost.name.toLowerCase(), gameManager);
@@ -167,6 +171,9 @@ describe('Shared Ghost Combat (Phase 2)', () => {
             player3.inCombat = true;
             player3.combatTarget = ghost.name;
             ghost.combatants.add(player3.id);
+
+            // Set ghost HP low so next attack kills it
+            ghost.hp = 5;
 
             // Kill ghost
             setTimeout(() => {

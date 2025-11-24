@@ -29,8 +29,11 @@ No environment variables required for basic setup. Render automatically provides
 3. Configure the project:
    - **Framework Preset**: Vite
    - **Root Directory**: `./` (project root)
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
+   - **Build Command**: `npm run build` (or leave as default if using vercel.json)
+   - **Output Directory**: `dist/client` (or leave as default if using vercel.json)
+   - **Install Command**: `npm install` (or leave as default)
+
+Note: A `vercel.json` file is provided in the root that configures these settings automatically.
 
 ### Environment Variables
 **CRITICAL**: Add this environment variable in Vercel dashboard:
@@ -86,6 +89,13 @@ const socket: Socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3
 4. **Verify CORS**: Ensure server CORS is set to `origin: "*"` or includes Vercel domain
 
 ### Common Issues
+
+**Issue**: "401 Unauthorized" or "Deployment not found"
+- **Solution**:
+  - Check Vercel deployment status in dashboard
+  - Ensure GitHub integration is working and latest commit deployed
+  - Check if deployment protection is enabled (disable for public access)
+  - Try redeploying from Vercel dashboard
 
 **Issue**: "WebSocket connection failed"
 - **Solution**: The Socket.IO config now includes fallback to polling transport

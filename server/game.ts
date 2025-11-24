@@ -358,7 +358,7 @@ export class GameManager {
     }
 
     getMinimap(player: Player): string {
-        const range = 7;
+        const range = 2;
         const pRoom = this.roomManager.getRoom(player.roomId)!;
         const px = pRoom.x;
         const py = pRoom.y;

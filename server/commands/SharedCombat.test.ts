@@ -44,8 +44,8 @@ describe('Shared Ghost Combat (Phase 2)', () => {
         mockIo.sockets.sockets.set(mockSocket2.id, mockSocket2);
 
         // Login both players
-        gameManager.handleLogin(mockSocket1, 'warrior');
-        gameManager.handleLogin(mockSocket2, 'rogue');
+        gameManager.connectionManager.handleLogin(mockSocket1, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket2, 'rogue');
 
         mockSocket1.emit.mockClear();
         mockSocket2.emit.mockClear();
@@ -167,7 +167,7 @@ describe('Shared Ghost Combat (Phase 2)', () => {
             broadcast: { emit: jest.fn() }
         };
         mockIo.sockets.sockets.set(mockSocket3.id, mockSocket3);
-        gameManager.handleLogin(mockSocket3, 'mage');
+        gameManager.connectionManager.handleLogin(mockSocket3, 'mage');
         const player3 = gameManager.playerManager.getPlayer(mockSocket3.id);
 
         const ghost = gameManager.ghostManager.getAllGhosts()[0];

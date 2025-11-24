@@ -19,8 +19,8 @@ describe('Jungeon Integration', () => {
 
         io.on('connection', (socket) => {
             serverSocket = socket;
-            gameManager.handleConnect(socket);
-            socket.on('login', (id) => gameManager.handleLogin(socket, id));
+            gameManager.connectionManager.handleConnect(socket);
+            socket.on('login', (id) => gameManager.connectionManager.handleLogin(socket, id));
             socket.on('command', (cmd) => gameManager.handleCommand(socket, cmd));
         });
 

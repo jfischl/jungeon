@@ -86,7 +86,7 @@ describe('GameManager', () => {
     });
 
     test('handleLogin adds player to starting room', () => {
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         const player = gameManager.playerManager.getPlayer('socket1');
         expect(player).toBeDefined();
@@ -96,7 +96,7 @@ describe('GameManager', () => {
     });
 
     test('move updates player position', () => {
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         // Room A -> North -> Room B
         gameManager.move(mockSocket, 'north');
@@ -106,7 +106,7 @@ describe('GameManager', () => {
     });
 
     test('move prevents invalid movement', () => {
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         gameManager.move(mockSocket, 'north'); // In Room B
         (mockSocket.emit as jest.Mock).mockClear();
@@ -119,7 +119,7 @@ describe('GameManager', () => {
     });
 
     test('collect adds coins to inventory', async () => {
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
         // Room A has 5 coins
 
         await gameManager.collect(mockSocket);
@@ -130,7 +130,7 @@ describe('GameManager', () => {
     });
 
     test('drop removes coins from inventory', () => {
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
         gameManager.collect(mockSocket); // Has 5
 
         gameManager.drop(mockSocket);

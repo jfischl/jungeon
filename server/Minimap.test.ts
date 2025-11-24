@@ -121,7 +121,7 @@ describe('Minimap', () => {
 
     test('minimap is generated and not empty when player has explored rooms', () => {
         // Login player
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         const player = gameManager.playerManager.getPlayer('socket1')!;
         expect(player).toBeDefined();
@@ -140,7 +140,7 @@ describe('Minimap', () => {
 
     test('minimap shows explored rooms only', () => {
         // Login player
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         const player = gameManager.playerManager.getPlayer('socket1')!;
 
@@ -161,7 +161,7 @@ describe('Minimap', () => {
 
     test('minimap updates when player moves to new rooms', () => {
         // Login player
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         const player = gameManager.playerManager.getPlayer('socket1')!;
 
@@ -188,7 +188,7 @@ describe('Minimap', () => {
 
     test('minimap shows multiple explored rooms after visiting several locations', () => {
         // Login player
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         const player = gameManager.playerManager.getPlayer('socket1')!;
 
@@ -217,7 +217,7 @@ describe('Minimap', () => {
 
     test('minimap does not show unexplored rooms', () => {
         // Login player
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         const player = gameManager.playerManager.getPlayer('socket1')!;
 
@@ -237,7 +237,7 @@ describe('Minimap', () => {
 
     test('minimap coordinates are correctly calculated', () => {
         // Login player
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         const player = gameManager.playerManager.getPlayer('socket1')!;
 

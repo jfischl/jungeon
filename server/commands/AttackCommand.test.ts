@@ -30,7 +30,7 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
         };
 
         // Login player
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
 
         // Clear emit calls from login
         mockSocket.emit.mockClear();

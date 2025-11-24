@@ -61,7 +61,7 @@ describe('Load Test - Race Condition Prevention', () => {
                 broadcast: { emit: jest.fn() }
             };
             mockIo.sockets.sockets.set(socket.id, socket);
-            gameManager.handleLogin(socket as any, `test-char-${i}`);
+            gameManager.connectionManager.handleLogin(socket as any, `test-char-${i}`);
 
             sockets.push(socket);
             players.push(gameManager.playerManager.getPlayer(socket.id)!);
@@ -116,7 +116,7 @@ describe('Load Test - Race Condition Prevention', () => {
                 broadcast: { emit: jest.fn() }
             };
             mockIo.sockets.sockets.set(socket.id, socket);
-            gameManager.handleLogin(socket as any, `test-char-${i}`);
+            gameManager.connectionManager.handleLogin(socket as any, `test-char-${i}`);
 
             sockets.push(socket);
             const player = gameManager.playerManager.getPlayer(socket.id)!;
@@ -167,7 +167,7 @@ describe('Load Test - Race Condition Prevention', () => {
                 broadcast: { emit: jest.fn() }
             };
             mockIo.sockets.sockets.set(socket.id, socket);
-            gameManager.handleLogin(socket as any, `test-char-${i}`);
+            gameManager.connectionManager.handleLogin(socket as any, `test-char-${i}`);
 
             sockets.push(socket);
             const player = gameManager.playerManager.getPlayer(socket.id)!;
@@ -220,7 +220,7 @@ describe('Load Test - Race Condition Prevention', () => {
                 broadcast: { emit: jest.fn() }
             };
             mockIo.sockets.sockets.set(socket.id, socket);
-            gameManager.handleLogin(socket as any, `test-char-${i}`);
+            gameManager.connectionManager.handleLogin(socket as any, `test-char-${i}`);
 
             const player = gameManager.playerManager.getPlayer(socket.id)!;
 

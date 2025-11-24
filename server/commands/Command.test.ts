@@ -39,7 +39,7 @@ describe('Command Integration', () => {
             clientSocket = Client(`http://localhost:${port}`);
             io.on('connection', (socket) => {
                 serverSocket = socket;
-                game.handleConnect(socket);
+                game.connectionManager.handleConnect(socket);
             });
             clientSocket.on('connect', done);
         });

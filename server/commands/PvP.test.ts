@@ -43,8 +43,8 @@ describe('PvP System Integration Tests', () => {
         mockIo.sockets.sockets.set(mockSocket1.id, mockSocket1);
         mockIo.sockets.sockets.set(mockSocket2.id, mockSocket2);
 
-        gameManager.handleLogin(mockSocket1, 'warrior');
-        gameManager.handleLogin(mockSocket2, 'rogue');
+        gameManager.connectionManager.handleLogin(mockSocket1, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket2, 'rogue');
 
         // Put them in same room (NOT starting room to avoid safe zone)
         const player1 = gameManager.playerManager.getPlayer(mockSocket1.id);

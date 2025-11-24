@@ -24,6 +24,7 @@ import { validateCommandInput, parseCommand, sanitizeInput, isValidMessage } fro
 import { PlayerManager } from './managers/PlayerManager';
 import { RoomManager } from './managers/RoomManager';
 import { GhostManager, Ghost } from './managers/GhostManager';
+import { ConnectionManager } from './managers/ConnectionManager';
 import { gameLogger, playerLogger } from './logger';
 
 export class GameManager {
@@ -34,6 +35,7 @@ export class GameManager {
     playerManager: PlayerManager;
     roomManager: RoomManager;
     ghostManager: GhostManager;
+    connectionManager: ConnectionManager;
 
     characters: Character[];
     combatManager: CombatManager;
@@ -65,6 +67,21 @@ export class GameManager {
         this.registerCommands();
 
         this.loadGame();
+
+        // Initialize ConnectionManager with all dependencies
+        this.connectionManager = new ConnectionManager(
+            this.playerManager,
+            this.roomManager,
+            this.repository,
+            () => this.characters,
+            () => this.worldData,
+            (roomId, message, excludeId) => this.broadcastToRoom(roomId, message, excludeId),
+            (socket) => this.look(socket),
+            (socket) => this.sendStats(socket),
+            () => this.saveGame(),
+            (socket, cmd) => this.handleCommand(socket, cmd)
+        );
+
         this.startGhostLoop();
     }
 
@@ -145,117 +162,6 @@ export class GameManager {
         }
         this.repository.savePlayers(playersToSave);
         gameLogger.debug({ playerCount }, 'Game saved successfully');
-    }
-
-    handleConnect(socket: Socket): void {
-        playerLogger.info({ socketId: socket.id }, 'Player connected');
-
-        socket.on('disconnect', () => {
-            if (this.playerManager.hasPlayer(socket.id)) {
-                const player = this.playerManager.getPlayer(socket.id)!;
-                playerLogger.info(
-                    { socketId: socket.id, character: player.character.name },
-                    'Player disconnected'
-                );
-                this.broadcastToRoom(player.roomId, `${player.character.name} has disconnected.`, socket.id);
-                this.playerManager.removePlayer(socket.id);
-                this.saveGame();
-            }
-        });
-
-        socket.on('login', (charId: string) => {
-            this.handleLogin(socket, charId);
-        });
-
-        socket.on('command', (cmd: string) => {
-            this.handleCommand(socket, cmd);
-        });
-
-        socket.emit('welcome', {
-            message: "Welcome to The Jungeon!",
-            availableCharacters: this.getAvailableCharacters()
-        });
-    }
-
-    handleLogin(socket: Socket, charId: string): void {
-        if (this.playerManager.hasPlayer(socket.id)) return;
-
-        // Sanitize character ID
-        const sanitizedCharId = sanitizeInput(charId, 50);
-
-        const char = this.characters.find(c => c.id === sanitizedCharId);
-        if (!char) {
-            playerLogger.warn(
-                { socketId: socket.id, attemptedCharId: sanitizedCharId },
-                'Login failed: invalid character'
-            );
-            socket.emit('error', "Invalid character.");
-            return;
-        }
-
-        const isTaken = this.playerManager.getAllPlayers().some(p => p.character.id === sanitizedCharId);
-        if (isTaken) {
-            playerLogger.debug(
-                { socketId: socket.id, character: char.name },
-                'Login failed: character already in use'
-            );
-            socket.emit('error', "Character already taken.");
-            socket.emit('updateCharacterList', this.getAvailableCharacters());
-            return;
-        }
-
-        // Restore state
-        let roomId = this.worldData.starting_room;
-        let inventory: Inventory = { coins: 0, items: [] };
-        let exploredRooms = new Set<string>();
-
-        const savedPlayers = this.repository.loadPlayers() as Record<string, { roomId: string; inventory: Inventory; exploredRooms?: string[] }> | null;
-        if (savedPlayers && savedPlayers[charId]) {
-            if (this.roomManager.getRoom(savedPlayers[charId].roomId)) {
-                roomId = savedPlayers[charId].roomId;
-            }
-            inventory = savedPlayers[charId].inventory;
-            // Load explored rooms from saved data
-            if (savedPlayers[charId].exploredRooms) {
-                exploredRooms = new Set(savedPlayers[charId].exploredRooms);
-            }
-        }
-
-        const player: Player = {
-            id: socket.id,
-            character: char,
-            roomId: roomId,
-            inventory: inventory,
-            exploredRooms: exploredRooms,
-            // Combat stats from character
-            hp: char.baseHp,
-            maxHp: char.baseHp,
-            attack: char.baseAttack,
-            defense: char.baseDefense,
-            level: 1,
-            experience: 0,
-            inCombat: false,
-            combatTarget: null,
-            isDefending: false
-        };
-
-        this.playerManager.addPlayer(socket.id, player);
-
-        playerLogger.info(
-            {
-                socketId: socket.id,
-                character: player.character.name,
-                startingRoom: player.roomId,
-                returning: savedPlayers && savedPlayers[charId] ? true : false
-            },
-            'Player logged in'
-        );
-
-        socket.emit('loginSuccess', { player, worldName: "The Jungeon" });
-
-        this.broadcastToRoom(player.roomId, `${player.character.name} has entered the game.`, socket.id);
-        this.look(socket);
-        this.sendStats(socket);
     }
 
     handleCommand(socket: Socket, commandString: string): void {
@@ -575,11 +481,6 @@ export class GameManager {
                 this.io.to(player.id).emit('message', message);
             }
         }
-    }
-
-    getAvailableCharacters(): Character[] {
-        const takenIds = this.playerManager.getAllPlayers().map(p => p.character.id);
-        return this.characters.filter(c => !takenIds.includes(c.id));
     }
 
     startGhostLoop(): void {

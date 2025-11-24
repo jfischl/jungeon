@@ -35,7 +35,7 @@ app.use(express.static(path.join(__dirname, '../client')));
 const game = new GameManager(io);
 
 io.on('connection', (socket) => {
-    game.handleConnect(socket);
+    game.connectionManager.handleConnect(socket);
 });
 
 server.listen(PORT, () => {

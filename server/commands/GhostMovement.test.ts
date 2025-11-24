@@ -27,7 +27,7 @@ describe('Ghost Movement Edge Cases', () => {
         };
 
         mockIo.sockets.sockets.set(mockSocket.id, mockSocket);
-        gameManager.handleLogin(mockSocket, 'warrior');
+        gameManager.connectionManager.handleLogin(mockSocket, 'warrior');
         mockSocket.emit.mockClear();
     });
 

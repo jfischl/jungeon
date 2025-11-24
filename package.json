@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:server": "tsc -p tsconfig.build.json",
+    "build:server": "tsc -p tsconfig.build.json && npm run copy:data",
+    "copy:data": "mkdir -p dist/server/data && cp server/data/*.json dist/server/data/",
     "preview": "vite preview",
     "start": "node dist/server/index.js",
     "start:dev": "ts-node server/index.ts",

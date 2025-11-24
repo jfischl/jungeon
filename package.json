@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:server": "tsc -p tsconfig.build.json",
     "preview": "vite preview",
-    "start": "ts-node server/index.ts",
+    "start": "node dist/server/index.js",
+    "start:dev": "ts-node server/index.ts",
     "test": "jest"
   },
   "keywords": [],

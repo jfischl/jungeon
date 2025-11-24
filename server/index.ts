@@ -19,8 +19,8 @@ if (process.argv.includes('--generate')) {
     // We continue to start the server after generation
 }
 
-// Serve static files from 'dist' (Vite build output)
-app.use(express.static(path.join(__dirname, '../dist')));
+// Serve static files from 'dist/client'
+app.use(express.static(path.join(__dirname, '../client')));
 
 const game = new GameManager(io);
 

@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { RoomDataPacket, Inventory, Player } from '../../shared/types';
 
-const socket: Socket = io();
+const socket: Socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3000');
 
 const output = document.getElementById('output') as HTMLDivElement;
 const input = document.getElementById('input') as HTMLInputElement;

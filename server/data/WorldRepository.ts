@@ -6,7 +6,7 @@ export class WorldRepository {
     private dataDir: string;
 
     constructor() {
-        this.dataDir = path.join(__dirname, '../data');
+        this.dataDir = path.join(process.cwd(), 'server/data');
         if (!fs.existsSync(this.dataDir)) {
             fs.mkdirSync(this.dataDir, { recursive: true });
         }

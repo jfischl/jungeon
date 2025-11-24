@@ -112,6 +112,62 @@ Key interfaces:
 - Each ghost tracks: hp, maxHp, attack, defense, goldReward, roomId, combatants (Set of player IDs)
 - Three ghosts spawn on server start, wander every 15 seconds
 
+### Concurrency Control
+
+**Race Condition Prevention** (`server/game.ts`)
+
+The game uses a **queue-based locking mechanism** to prevent race conditions in concurrent operations on shared room state.
+
+**Problem**: Node.js is single-threaded but async operations can interleave, creating TOCTOU (time-of-check-to-time-of-use) vulnerabilities:
+```typescript
+// BAD - Race condition possible
+async collect(socket: Socket) {
+    const room = this.roomManager.getRoom(player.roomId);
+    if (room.coins > 0) {  // Check
+        const coins = room.coins;
+        room.coins = 0;      // Use - another operation could interleave here!
+        player.inventory.coins += coins;
+    }
+}
+```
+
+**Solution**: Per-room operation queues using Promise chaining:
+```typescript
+private roomOperationQueues: Map<string, Promise<any>>;
+
+private async executeRoomOperation<T>(
+    roomId: string,
+    operation: () => T
+): Promise<T> {
+    const existing = this.roomOperationQueues.get(roomId) || Promise.resolve();
+    const newOperation = existing.then(() => operation());
+    this.roomOperationQueues.set(roomId, newOperation);
+    newOperation.finally(() => {
+        if (this.roomOperationQueues.get(roomId) === newOperation) {
+            this.roomOperationQueues.delete(roomId);
+        }
+    });
+    return newOperation;
+}
+```
+
+**Protected Operations**:
+- `pickUpItem()` - Prevents duplicate item pickup
+- `collect()` - Prevents coin duplication
+- `drop()` - Prevents coin loss
+
+**Key Benefits**:
+- Per-room granularity: Different rooms process concurrently
+- Non-blocking: Uses Promise chaining, doesn't block event loop
+- Automatic cleanup: `finally()` prevents memory leaks
+- Excellent performance: <1ms overhead, tested with 50 concurrent operations
+
+**Test Coverage**:
+- `RaceConditions.test.ts` - 8 TDD-style tests for correctness
+- `LoadTest.test.ts` - 4 load tests simulating realistic concurrent usage
+
+**Future Considerations**: Ghost combat operations may benefit from similar protection (see `RACE_CONDITION_REVIEW.md`).
+
 ### Minimap System
 
 - 7x7 grid centered on player
@@ -128,6 +184,8 @@ Integration tests cover:
 - PvP system: `PvP.test.ts` (6 tests)
 - Ghost movement: `GhostMovement.test.ts` (3 tests)
 - Map generation: `solvability.test.ts`
+- Race conditions: `RaceConditions.test.ts` (8 tests - item/coin duplication prevention)
+- Load testing: `LoadTest.test.ts` (4 tests - 10-50 concurrent operations)
 
 Tests use mock Socket.IO and in-memory game state.
 

@@ -118,11 +118,11 @@ describe('GameManager', () => {
         expect(mockSocket.emit).toHaveBeenCalledWith('message', "You can't go that way.");
     });
 
-    test('collect adds coins to inventory', () => {
+    test('collect adds coins to inventory', async () => {
         gameManager.handleLogin(mockSocket, 'warrior');
         // Room A has 5 coins
 
-        gameManager.collect(mockSocket);
+        await gameManager.collect(mockSocket);
 
         const player = gameManager.playerManager.getPlayer('socket1')!;
         expect(player.inventory.coins).toBe(5);

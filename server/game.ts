@@ -41,6 +41,7 @@ export class GameManager {
 
     private repository: WorldRepository;
     private commands: Map<string, Command>;
+    private roomOperationQueues: Map<string, Promise<any>>;
 
     constructor(io: Server) {
         this.io = io;
@@ -60,6 +61,7 @@ export class GameManager {
         this.commands = new Map();
         this.combatManager = new CombatManager(this);
         this.pendingChallenges = new Map();
+        this.roomOperationQueues = new Map();
         this.registerCommands();
 
         this.loadGame();
@@ -406,56 +408,109 @@ export class GameManager {
         return mapStr;
     }
 
-    pickUpItem(socket: Socket, itemName: string): void {
-        const player = this.playerManager.getPlayer(socket.id)!;
-        const room = this.roomManager.getRoom(player.roomId)!;
+    /**
+     * Execute a room operation with queueing to prevent race conditions
+     * This ensures that operations on the same room are processed sequentially
+     */
+    private async executeRoomOperation<T>(
+        roomId: string,
+        operation: () => T
+    ): Promise<T> {
+        // Get the existing queue for this room, or create a resolved promise
+        const existing = this.roomOperationQueues.get(roomId) || Promise.resolve();
 
-        const itemIndex = room.items.findIndex(i => i.name.toLowerCase().includes(itemName.toLowerCase())); // Use room.items
+        // Chain the new operation after the existing queue
+        const newOperation = existing.then(() => operation()).catch((error) => {
+            gameLogger.error({ roomId, error }, 'Room operation failed');
+            throw error;
+        });
 
-        if (itemIndex !== -1) {
-            const item = room.items.splice(itemIndex, 1)[0]; // Use room.items
-            player.inventory.items.push(item);
-            socket.emit('message', `You picked up ${item.name}.`);
-            socket.emit('updateInventory', player.inventory);
-            this.broadcastToRoom(player.roomId, `${player.character.name} picks up ${item.name}.`, socket.id);
-            this.look(socket);
-        } else {
-            socket.emit('message', "You don't see that here.");
-        }
+        // Update the queue
+        this.roomOperationQueues.set(roomId, newOperation);
+
+        // Clean up resolved promises to prevent memory leaks
+        newOperation.finally(() => {
+            if (this.roomOperationQueues.get(roomId) === newOperation) {
+                this.roomOperationQueues.delete(roomId);
+            }
+        });
+
+        return newOperation;
     }
 
-    collect(socket: Socket): void {
+    pickUpItem(socket: Socket, itemName: string): Promise<void> {
         const player = this.playerManager.getPlayer(socket.id)!;
-        const room = this.roomManager.getRoom(player.roomId)!;
+        const roomId = player.roomId;
 
-        if (room.coins > 0) {
-            const amount = room.coins;
-            player.inventory.coins += amount;
-            room.coins = 0;
-            socket.emit('message', `You collected ${amount} coins.`);
-            socket.emit('updateInventory', player.inventory);
-            this.broadcastToRoom(player.roomId, `${player.character.name} collects some coins.`, socket.id);
-            this.look(socket);
-        } else {
-            socket.emit('message', "There are no coins here.");
-        }
+        // Use executeRoomOperation to prevent race conditions
+        return this.executeRoomOperation(roomId, () => {
+            const room = this.roomManager.getRoom(roomId)!;
+            const itemIndex = room.items.findIndex(i => i.name.toLowerCase().includes(itemName.toLowerCase()));
+
+            if (itemIndex !== -1) {
+                const item = room.items.splice(itemIndex, 1)[0];
+                player.inventory.items.push(item);
+                socket.emit('message', `You picked up ${item.name}.`);
+                socket.emit('updateInventory', player.inventory);
+                this.broadcastToRoom(roomId, `${player.character.name} picks up ${item.name}.`, socket.id);
+                this.look(socket);
+            } else {
+                socket.emit('message', "You don't see that here.");
+            }
+        }).catch((error) => {
+            gameLogger.error({ playerId: player.id, error }, 'Failed to pick up item');
+            socket.emit('error', 'Failed to pick up item.');
+        });
     }
 
-    drop(socket: Socket): void {
+    collect(socket: Socket): Promise<void> {
         const player = this.playerManager.getPlayer(socket.id)!;
-        const room = this.roomManager.getRoom(player.roomId)!;
+        const roomId = player.roomId;
 
-        if (player.inventory.coins > 0) {
-            const amount = player.inventory.coins;
-            player.inventory.coins = 0;
-            room.coins += amount;
-            socket.emit('message', `You dropped ${amount} coins.`);
-            socket.emit('updateInventory', player.inventory);
-            this.broadcastToRoom(player.roomId, `${player.character.name} drops some coins.`, socket.id);
-            this.look(socket);
-        } else {
-            socket.emit('message', "You have no coins to drop.");
-        }
+        // Use executeRoomOperation to prevent race conditions
+        return this.executeRoomOperation(roomId, () => {
+            const room = this.roomManager.getRoom(roomId)!;
+
+            if (room.coins > 0) {
+                const amount = room.coins;
+                room.coins = 0; // Clear room coins atomically after reading
+                player.inventory.coins += amount;
+                socket.emit('message', `You collected ${amount} coins.`);
+                socket.emit('updateInventory', player.inventory);
+                this.broadcastToRoom(roomId, `${player.character.name} collects some coins.`, socket.id);
+                this.look(socket);
+            } else {
+                socket.emit('message', "There are no coins here.");
+            }
+        }).catch((error) => {
+            gameLogger.error({ playerId: player.id, error }, 'Failed to collect coins');
+            socket.emit('error', 'Failed to collect coins.');
+        });
+    }
+
+    drop(socket: Socket): Promise<void> {
+        const player = this.playerManager.getPlayer(socket.id)!;
+        const roomId = player.roomId;
+
+        // Use executeRoomOperation to prevent race conditions
+        return this.executeRoomOperation(roomId, () => {
+            const room = this.roomManager.getRoom(roomId)!;
+
+            if (player.inventory.coins > 0) {
+                const amount = player.inventory.coins;
+                player.inventory.coins = 0;
+                room.coins += amount;
+                socket.emit('message', `You dropped ${amount} coins.`);
+                socket.emit('updateInventory', player.inventory);
+                this.broadcastToRoom(roomId, `${player.character.name} drops some coins.`, socket.id);
+                this.look(socket);
+            } else {
+                socket.emit('message', "You have no coins to drop.");
+            }
+        }).catch((error) => {
+            gameLogger.error({ playerId: player.id, error }, 'Failed to drop coins');
+            socket.emit('error', 'Failed to drop coins.');
+        });
     }
 
     inventory(socket: Socket): void {

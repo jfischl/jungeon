@@ -1,1 +1,14 @@
-{}
+{
+  "warrior": {
+    "roomId": "test_room_3",
+    "inventory": {
+      "coins": 100,
+      "items": []
+    },
+    "exploredRooms": [
+      "test_room_1",
+      "test_room_2",
+      "test_room_3"
+    ]
+  }
+}

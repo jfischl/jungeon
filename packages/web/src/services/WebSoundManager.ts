@@ -10,15 +10,29 @@ export class WebSoundManager implements ISoundManager {
     private enabled: boolean = true;
     private volume: number = 0.5;
     private initialized: boolean = false;
+    private initPromise: Promise<void> | null = null;
+    private pendingSounds: SoundHint[] = [];
 
     async initialize(): Promise<void> {
         if (this.initialized) return;
+        if (this.initPromise) return this.initPromise;
 
+        this.initPromise = this.doInitialize();
+        return this.initPromise;
+    }
+
+    private async doInitialize(): Promise<void> {
         try {
             this.audioContext = new AudioContext();
             await this.loadAllSounds();
             this.initialized = true;
             console.log('WebSoundManager initialized');
+
+            // Play any sounds that were queued during initialization
+            for (const hint of this.pendingSounds) {
+                this.play(hint);
+            }
+            this.pendingSounds = [];
         } catch (error) {
             console.warn('Failed to initialize audio:', error);
         }
@@ -80,7 +94,15 @@ export class WebSoundManager implements ISoundManager {
     }
 
     play(hint: SoundHint): void {
-        if (!this.enabled || !this.audioContext || !this.initialized) {
+        if (!this.enabled) {
+            return;
+        }
+
+        // Queue sounds if initialization is in progress
+        if (!this.initialized) {
+            if (this.initPromise) {
+                this.pendingSounds.push(hint);
+            }
             return;
         }
 

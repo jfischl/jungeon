@@ -258,6 +258,93 @@ When running tests, you will see this warning:
 
 **Resolution**: Accept the warning as cosmetic. All tests pass successfully and the warning has no functional impact.
 
+## Mobile Development (Expo/React Native)
+
+### Monorepo Setup
+
+The `packages/mobile` directory contains a React Native app using Expo SDK 54. Key configuration files:
+
+**metro.config.js** - Enables imports from sibling packages:
+```javascript
+const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
+
+const projectRoot = __dirname;
+const monorepoRoot = path.resolve(projectRoot, '../..');
+
+const config = getDefaultConfig(projectRoot);
+
+// Watch all files in the monorepo
+config.watchFolders = [monorepoRoot];
+
+// Let Metro know where to resolve packages from
+config.resolver.nodeModulesPaths = [
+    path.resolve(projectRoot, 'node_modules'),
+    path.resolve(monorepoRoot, 'node_modules'),
+];
+
+// Ensure we resolve from the monorepo packages
+config.resolver.extraNodeModules = {
+    '@jungeon/shared': path.resolve(monorepoRoot, 'packages/shared/src'),
+    '@jungeon/client-core': path.resolve(monorepoRoot, 'packages/client-core/src'),
+};
+
+module.exports = config;
+```
+
+### Critical: React Version Alignment
+
+**IMPORTANT:** In npm workspaces monorepos, React Native has strict React version requirements. Expo SDK 54 with React Native 0.81.5 requires **exactly React 19.1.0**.
+
+**Symptom of version mismatch:**
+```
+TypeError: Cannot read property 'S' of undefined
+TypeError: Cannot read property 'default' of undefined
+```
+
+These cryptic errors occur when npm dedupes to a different React version than what react-native expects.
+
+**Diagnosis:**
+```bash
+npm ls react
+```
+
+Look for `invalid` warnings like:
+```
+react@18.3.1 deduped invalid: "^19.1.0" from node_modules/react-native
+```
+
+**Solution:** Pin React versions identically across ALL packages:
+```json
+// packages/web/package.json AND packages/mobile/package.json
+{
+  "dependencies": {
+    "react": "19.1.0"  // Pinned, not "^19.1.0"
+  }
+}
+```
+
+Then clean reinstall:
+```bash
+rm -rf node_modules package-lock.json
+npm install --legacy-peer-deps
+```
+
+**Prevention:**
+- Always use pinned versions (no caret `^`) for React in monorepos with React Native
+- Run `npm ls react` after adding new packages to verify no "invalid" warnings
+- Keep all React versions identical across packages
+
+### Running Mobile Development
+
+```bash
+cd packages/mobile
+npx expo start --ios --clear   # Start with iOS simulator
+npx expo start                 # Start for Expo Go app
+```
+
+The `--clear` flag clears Metro bundler cache, useful when switching branches or after dependency changes.
+
 ## Important Notes
 
 - The project uses CommonJS (`"type": "commonjs"` in package.json)

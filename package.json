@@ -9,6 +9,9 @@
   "scripts": {
     "dev": "vite",
     "dev:web": "npm run dev --workspace=@jungeon/web",
+    "dev:mobile": "npm run start --workspace=@jungeon/mobile",
+    "mobile:ios": "npm run ios --workspace=@jungeon/mobile",
+    "mobile:android": "npm run android --workspace=@jungeon/mobile",
     "build": "vite build",
     "build:web": "npm run build --workspace=@jungeon/web",
     "build:server": "tsc -p tsconfig.build.json && npm run copy:data",

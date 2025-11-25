@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "The Jungeon",
+    "slug": "jungeon",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "entryPoint": "./index.js",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a1a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jungeon.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a1a1a"
+      },
+      "package": "com.jungeon.app"
+    }
+  }
+}

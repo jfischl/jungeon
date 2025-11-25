@@ -8,11 +8,19 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "baseUrl": ".",
+        "paths": {
+            "@jungeon/shared": ["packages/shared/src"],
+            "@jungeon/shared/*": ["packages/shared/src/*"],
+            "@jungeon/client-core": ["packages/client-core/src"],
+            "@jungeon/client-core/*": ["packages/client-core/src/*"]
+        }
     },
     "include": [
         "server/**/*",
         "shared/**/*",
+        "packages/**/*",
         "jest.setup.d.ts"
     ],
     "exclude": [

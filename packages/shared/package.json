@@ -1,0 +1,12 @@
+{
+  "name": "@jungeon/shared",
+  "version": "1.0.0",
+  "description": "Shared types and validators for Jungeon",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "license": "ISC"
+}

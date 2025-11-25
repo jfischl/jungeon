@@ -60,6 +60,14 @@ npm run start:dev -- --generate  # Generate new 100-room procedural map
 - Movement: `MoveCommand` (handles locked doors)
 - Social: `SayCommand`, `EmoteCommand`
 - Items: `GetCommand`, `DropCommand`, `UnlockCommand`, `ExamineCommand`
+- Utility: `HelpCommand`, `DebugCommand`
+
+**IMPORTANT - Adding New Commands:**
+When adding a new command, you must update TWO places:
+1. `server/commands/CommandRegistry.ts` - Register the command class
+2. `shared/validators.ts` - Add command name to `VALID_COMMANDS` array
+
+The client validates commands against `VALID_COMMANDS` before sending to the server. If you forget step 2, the command will be rejected client-side with "Unknown command" error even though the server has it registered.
 
 **Data Layer** (`server/data/`)
 - `WorldRepository.ts`: JSON persistence for world/player state

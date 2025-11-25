@@ -20,12 +20,13 @@ export const VALID_COMMANDS = [
     'emote', 'em',
     'examine', 'ex',
     'unlock',
-    'attack',
+    'attack', 'kill',
     'flee', 'run',
     'defend', 'block',
     'heal', 'drink',
     'challenge', 'duel',
     'accept',
+    'help', '?',
     'debug'
 ] as const;
 export type ValidCommand = typeof VALID_COMMANDS[number];

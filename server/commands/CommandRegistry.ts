@@ -16,6 +16,7 @@ import { DefendCommand } from './DefendCommand';
 import { HealCommand } from './HealCommand';
 import { ChallengeCommand } from './ChallengeCommand';
 import { AcceptCommand } from './AcceptCommand';
+import { HelpCommand } from './HelpCommand';
 import { validateCommandInput, parseCommand } from '../../shared/validators';
 import { gameLogger } from '../logger';
 import type { GameManager } from '../game';
@@ -81,6 +82,8 @@ export class CommandRegistry {
 
         // Utility commands
         this.register('debug', new DebugCommand());
+        this.register('help', new HelpCommand());
+        this.register('?', new HelpCommand());
     }
 
     private register(name: string, command: Command): void {

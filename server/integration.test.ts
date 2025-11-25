@@ -71,7 +71,9 @@ describe('Jungeon Integration', () => {
             // Wait for login to complete
             setTimeout(() => {
                 client2.on('message', (msg: any) => {
-                    if (msg.includes('says: "Hello"')) {
+                    // Handle both string and object message formats
+                    const msgText = typeof msg === 'string' ? msg : msg.message;
+                    if (msgText && msgText.includes('says: "Hello"')) {
                         client2.close();
                         done();
                     }

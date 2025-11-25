@@ -76,10 +76,7 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
             // Should engage combat
             expect(player.inCombat).toBe(true);
             expect(player.combatTarget).toBe(ghostName);
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('engage')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/engage/i);
 
             jest.runAllTimers();
         }
@@ -101,10 +98,7 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
 
             // Ghost should have taken damage
             expect(ghost.hp).toBeLessThan(initialHp);
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('damage')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/damage/i);
 
             jest.runAllTimers();
         }
@@ -134,10 +128,7 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
             // Second attack (should continue combat)
             attackCommand.execute(mockSocket, ghost.name.toLowerCase(), gameManager);
             expect(player.inCombat).toBe(true);
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('attack')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/attack/i);
 
             jest.runAllTimers();
         }
@@ -259,9 +250,6 @@ describe('AttackCommand - Ghost Combat (PvE)', () => {
         expect(player.level).toBe(initialLevel + 1);
         expect(player.maxHp).toBe(initialMaxHp + 10);
         expect(player.attack).toBe(initialAttack + 1);
-        expect(mockSocket.emit).toHaveBeenCalledWith(
-            'message',
-            expect.stringContaining('LEVEL UP')
-        );
+        expect(mockSocket).toHaveEmittedMessage(/LEVEL UP/i, 'level-up');
     });
 });

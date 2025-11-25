@@ -57,10 +57,7 @@ describe('Item Commands', () => {
             const itemName = room.items[0].name;
             await gameManager.pickUpItem(mockSocket, itemName);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('picked up')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/picked up/i, 'pickup-item');
         });
 
         it('should pick up coins from room', async () => {
@@ -94,10 +91,7 @@ describe('Item Commands', () => {
 
             await gameManager.drop(mockSocket);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('dropped')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/dropped/i, 'drop');
         });
 
         it('should handle no coins to drop', async () => {
@@ -187,10 +181,7 @@ describe('Item Commands', () => {
 
                 unlockCommand.execute(mockSocket, direction, gameManager);
 
-                expect(mockSocket.emit).toHaveBeenCalledWith(
-                    'message',
-                    expect.stringContaining('unlock')
-                );
+                expect(mockSocket).toHaveEmittedMessage(/unlock/i, 'unlock');
                 expect(room.locks[direction]).toBeUndefined();
             }
         });
@@ -206,10 +197,7 @@ describe('Item Commands', () => {
 
                 unlockCommand.execute(mockSocket, direction, gameManager);
 
-                expect(mockSocket.emit).toHaveBeenCalledWith(
-                    'message',
-                    expect.stringContaining("don't have the right key")
-                );
+                expect(mockSocket).toHaveEmittedMessage(/don't have the right key/i, 'door-locked');
             }
         });
 

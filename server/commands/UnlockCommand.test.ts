@@ -106,10 +106,7 @@ describe('UnlockCommand', () => {
     it('should unlock door with correct key', () => {
         command.execute(mockSocket, 'north', mockGame);
 
-        expect(mockSocket.emit).toHaveBeenCalledWith(
-            'message',
-            'You unlock the north door with the Ornate Bronze Key.'
-        );
+        expect(mockSocket).toHaveEmittedMessage('You unlock the north door with the Ornate Bronze Key.', 'unlock');
         expect(mockGame.roomManager.getRoom('room_1')!.locks['north']).toBeUndefined();
         expect(mockGame.roomManager.getRoom('room_2')!.locks['south']).toBeUndefined();
         expect(mockGame.saveGame).toHaveBeenCalled();
@@ -118,10 +115,7 @@ describe('UnlockCommand', () => {
     it('should work with short direction aliases', () => {
         command.execute(mockSocket, 'n', mockGame);
 
-        expect(mockSocket.emit).toHaveBeenCalledWith(
-            'message',
-            'You unlock the north door with the Ornate Bronze Key.'
-        );
+        expect(mockSocket).toHaveEmittedMessage('You unlock the north door with the Ornate Bronze Key.', 'unlock');
     });
 
     it('should handle door that is not locked', () => {
@@ -149,10 +143,7 @@ describe('UnlockCommand', () => {
 
         command.execute(mockSocket, 'north', mockGame);
 
-        expect(mockSocket.emit).toHaveBeenCalledWith(
-            'message',
-            'The north door is locked. You don\'t have the right key.'
-        );
+        expect(mockSocket).toHaveEmittedMessage('The north door is locked. You don\'t have the right key.', 'door-locked');
     });
 
     it('should handle wrong key', () => {
@@ -166,10 +157,7 @@ describe('UnlockCommand', () => {
 
         command.execute(mockSocket, 'north', mockGame);
 
-        expect(mockSocket.emit).toHaveBeenCalledWith(
-            'message',
-            'The north door is locked. You don\'t have the right key.'
-        );
+        expect(mockSocket).toHaveEmittedMessage('The north door is locked. You don\'t have the right key.', 'door-locked');
     });
 
     it('should require a direction argument', () => {

@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
+import { emitMessage } from '../utils/socketEmit';
 
 export class AcceptCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -52,10 +53,10 @@ export class AcceptCommand implements Command {
         const challengerSocket = Array.from(game.io.sockets.sockets.values()).find(s => s.id === challenger.id);
 
         if (challengerSocket) {
-            challengerSocket.emit('message', `Duel accepted! You are fighting ${acceptor.character.name}!`);
+            emitMessage(challengerSocket, `Duel accepted! You are fighting ${acceptor.character.name}!`, 'duel-start');
             challengerSocket.emit('message', `You have the initiative! Type 'attack' to strike first!`);
         }
 
-        socket.emit('message', `You accepted the duel! Prepare to fight ${challenger.character.name}!`);
+        emitMessage(socket, `You accepted the duel! Prepare to fight ${challenger.character.name}!`, 'duel-start');
     }
 }

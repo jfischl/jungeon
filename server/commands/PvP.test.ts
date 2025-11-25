@@ -76,14 +76,8 @@ describe('PvP System Integration Tests', () => {
 
         const challengeId = `${mockSocket1.id}-${mockSocket2.id}`;
         expect(gameManager.pendingChallenges.has(challengeId)).toBe(true);
-        expect(mockSocket1.emit).toHaveBeenCalledWith(
-            'message',
-            expect.stringContaining('challenged')
-        );
-        expect(mockSocket2.emit).toHaveBeenCalledWith(
-            'message',
-            expect.stringContaining('challenged you')
-        );
+        expect(mockSocket1).toHaveEmittedMessage(/challenged/i, 'challenge-sent');
+        expect(mockSocket2).toHaveEmittedMessage(/challenged you/i, 'challenge-received');
 
         jest.runAllTimers();
         jest.useRealTimers();
@@ -122,10 +116,7 @@ describe('PvP System Integration Tests', () => {
         expect(player1.combatTarget).toBe(player2.character.name);
         expect(player2.combatTarget).toBe(player1.character.name);
 
-        expect(mockSocket2.emit).toHaveBeenCalledWith(
-            'message',
-            expect.stringContaining('accepted the duel')
-        );
+        expect(mockSocket2).toHaveEmittedMessage(/accepted the duel/i, 'duel-start');
     });
 
     it('should allow PvP combat after acceptance', () => {
@@ -145,10 +136,7 @@ describe('PvP System Integration Tests', () => {
         attackCommand.execute(mockSocket1, player2.character.name.toLowerCase(), gameManager);
 
         expect(player2.hp).toBeLessThan(initialHp2);
-        expect(mockSocket1.emit).toHaveBeenCalledWith(
-            'message',
-            expect.stringContaining('You attack')
-        );
+        expect(mockSocket1).toHaveEmittedMessage(/You attack/i);
 
         jest.runAllTimers();
         jest.useRealTimers();

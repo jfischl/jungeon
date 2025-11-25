@@ -194,10 +194,7 @@ describe('CombatManager Unit Tests', () => {
             expect(player.attack).toBe(initialAttack + 1);
             expect(player.defense).toBe(initialDefense + 1);
             expect(player.hp).toBe(player.maxHp); // Full heal on level up
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('LEVEL UP')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/LEVEL UP/i, 'level-up');
         });
 
         it('should support multiple level ups', () => {

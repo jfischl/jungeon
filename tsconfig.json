@@ -12,7 +12,8 @@
     },
     "include": [
         "server/**/*",
-        "shared/**/*"
+        "shared/**/*",
+        "jest.setup.d.ts"
     ],
     "exclude": [
         "node_modules",

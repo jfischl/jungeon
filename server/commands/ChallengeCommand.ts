@@ -2,6 +2,7 @@ import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
 import { CONFIG } from '../config';
+import { emitMessage } from '../utils/socketEmit';
 
 export class ChallengeCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -56,11 +57,11 @@ export class ChallengeCommand implements Command {
         });
 
         // Notify players
-        socket.emit('message', `You have challenged ${targetPlayer.character.name} to a duel! Waiting for response...`);
+        emitMessage(socket, `You have challenged ${targetPlayer.character.name} to a duel! Waiting for response...`, 'challenge-sent');
 
         const targetSocket = Array.from(game.io.sockets.sockets.values()).find(s => s.id === targetPlayer.id);
         if (targetSocket) {
-            targetSocket.emit('message', `⚔️  ${challenger.character.name} has challenged you to a duel!`);
+            emitMessage(targetSocket, `⚔️  ${challenger.character.name} has challenged you to a duel!`, 'challenge-received');
             targetSocket.emit('message', `Type 'accept' within ${CONFIG.PVP.CHALLENGE_TIMEOUT_MS / 1000} seconds to fight!`);
         }
 

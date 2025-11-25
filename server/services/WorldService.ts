@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { Player, Room } from '../../shared/types';
+import { Player, Room, SoundHint } from '../../shared/types';
 import { RoomManager } from '../managers/RoomManager';
 import { PlayerManager } from '../managers/PlayerManager';
 
@@ -113,10 +113,25 @@ export class WorldService {
     /**
      * Broadcast a message to all players in a room
      */
-    broadcastToRoom(roomId: string, message: string, excludeSocketId?: string): void {
+    broadcastToRoom(roomId: string, message: string, excludeSocketId?: string, soundHint?: SoundHint): void {
         for (const player of this.playerManager.getAllPlayers()) {
             if (player.roomId === roomId && player.id !== excludeSocketId) {
-                this.io.to(player.id).emit('message', message);
+                if (soundHint) {
+                    this.io.to(player.id).emit('message', { message, soundHint });
+                } else {
+                    this.io.to(player.id).emit('message', message);
+                }
+            }
+        }
+    }
+
+    /**
+     * Send a standalone sound to all players in a room
+     */
+    broadcastSoundToRoom(roomId: string, soundHint: SoundHint, excludeSocketId?: string): void {
+        for (const player of this.playerManager.getAllPlayers()) {
+            if (player.roomId === roomId && player.id !== excludeSocketId) {
+                this.io.to(player.id).emit('sound', soundHint);
             }
         }
     }

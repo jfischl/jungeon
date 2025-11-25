@@ -3,6 +3,7 @@ import { Socket } from 'socket.io';
 import { GameManager } from './game';
 import { CONFIG } from './config';
 import { combatLogger } from './logger';
+import { emitMessage } from './utils/socketEmit';
 
 export class CombatManager {
     private game: GameManager;
@@ -109,9 +110,10 @@ export class CombatManager {
         game.ghostManager.removePlayerFromAllCombat(deadPlayer.id);
 
         // Notify player
-        game.io.to(socket).emit('message',
-            `You have been defeated! -${goldLoss} coins, -${CONFIG.DEATH.XP_LOSS} XP. Respawned at starting room.`
-        );
+        game.io.to(socket).emit('message', {
+            message: `You have been defeated! -${goldLoss} coins, -${CONFIG.DEATH.XP_LOSS} XP. Respawned at starting room.`,
+            soundHint: 'death'
+        });
         game.look(game.io.sockets.sockets.get(socket)!);
     }
 
@@ -145,8 +147,9 @@ export class CombatManager {
                 'Player level up'
             );
 
-            socket.emit('message',
-                `🎉 LEVEL UP! You are now level ${player.level}! +${CONFIG.LEVELING.HP_PER_LEVEL} HP, +${CONFIG.LEVELING.ATTACK_PER_LEVEL} ATK, +${CONFIG.LEVELING.DEFENSE_PER_LEVEL} DEF`
+            emitMessage(socket,
+                `🎉 LEVEL UP! You are now level ${player.level}! +${CONFIG.LEVELING.HP_PER_LEVEL} HP, +${CONFIG.LEVELING.ATTACK_PER_LEVEL} ATK, +${CONFIG.LEVELING.DEFENSE_PER_LEVEL} DEF`,
+                'level-up'
             );
         }
     }

@@ -62,4 +62,37 @@ export interface RoomDataPacket {
     items: Item[];
     ghosts: string[];
     minimap: string;
+    soundHint?: SoundHint;
 }
+
+// Sound hints that the server can send to trigger client-side audio
+export type SoundHint =
+    // Combat
+    | 'attack'
+    | 'attack-critical'
+    | 'damage-taken'
+    | 'defend'
+    | 'flee'
+    | 'flee-fail'
+    | 'heal'
+    | 'victory'
+    | 'death'
+    | 'level-up'
+    // Movement & Environment
+    | 'enter-room'
+    | 'door-locked'
+    | 'unlock'
+    // Items
+    | 'pickup-item'
+    | 'pickup-coins'
+    | 'drop'
+    // Social
+    | 'chat'
+    | 'challenge-received'
+    | 'challenge-sent'
+    | 'duel-start'
+    // Monsters
+    | 'ghost-enters'
+    | 'ghost-nearby'
+    // Errors
+    | 'error';

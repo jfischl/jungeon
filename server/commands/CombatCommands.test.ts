@@ -69,10 +69,7 @@ describe('Combat Commands Integration Tests', () => {
 
             expect(player.inCombat).toBe(false);
             expect(player.combatTarget).toBe(null);
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('You fled from combat')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/You fled from combat/i, 'flee');
         });
 
         it('should fail to flee and take damage', () => {
@@ -88,10 +85,7 @@ describe('Combat Commands Integration Tests', () => {
 
             expect(player.inCombat).toBe(true);
             expect(player.hp).toBeLessThan(initialHp);
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('Failed to flee')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/Failed to flee/i, 'flee-fail');
         });
 
         it('should handle death on failed flee', () => {
@@ -132,10 +126,7 @@ describe('Combat Commands Integration Tests', () => {
             defendCommand.execute(mockSocket, '', gameManager);
 
             expect(player.isDefending).toBe(true);
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('raise your guard')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/raise your guard/i, 'defend');
         });
     });
 
@@ -161,10 +152,7 @@ describe('Combat Commands Integration Tests', () => {
 
             expect(player.hp).toBe(80); // 50 + 30
             expect(player.inventory.items.length).toBe(0);
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('restore 30 HP')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/restore 30 HP/i, 'heal');
         });
 
         it('should not exceed max HP', () => {
@@ -175,10 +163,7 @@ describe('Combat Commands Integration Tests', () => {
             healCommand.execute(mockSocket, '', gameManager);
 
             expect(player.hp).toBe(player.maxHp);
-            expect(mockSocket.emit).toHaveBeenCalledWith(
-                'message',
-                expect.stringContaining('restore 10 HP')
-            );
+            expect(mockSocket).toHaveEmittedMessage(/restore 10 HP/i, 'heal');
         });
 
         it('should update inventory UI after healing', () => {

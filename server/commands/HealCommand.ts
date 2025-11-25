@@ -2,6 +2,7 @@ import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
 import { CONFIG } from '../config';
+import { emitMessage } from '../utils/socketEmit';
 
 export class HealCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -28,7 +29,7 @@ export class HealCommand implements Command {
         player.hp = Math.min(player.maxHp, player.hp + healAmount);
         const actualHeal = player.hp - oldHp;
 
-        socket.emit('message', `You drink the ${potion.name} and restore ${actualHeal} HP!`);
+        emitMessage(socket, `You drink the ${potion.name} and restore ${actualHeal} HP!`, 'heal');
         socket.emit('message', `HP: ${player.hp}/${player.maxHp}`);
 
         game.sendStats(socket);

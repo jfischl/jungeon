@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
+import { emitMessage } from '../utils/socketEmit';
 
 export class UnlockCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -36,7 +37,7 @@ export class UnlockCommand implements Command {
         const key = player.inventory.items.find(i => i.id === keyId);
 
         if (!key) {
-            socket.emit('message', `The ${fullDir} door is locked. You don't have the right key.`);
+            emitMessage(socket, `The ${fullDir} door is locked. You don't have the right key.`, 'door-locked');
             return;
         }
 
@@ -48,7 +49,7 @@ export class UnlockCommand implements Command {
             delete nextRoom.locks[oppDir];
         }
 
-        socket.emit('message', `You unlock the ${fullDir} door with the ${key.name}.`);
+        emitMessage(socket, `You unlock the ${fullDir} door with the ${key.name}.`, 'unlock');
         game.saveGame();
     }
 }

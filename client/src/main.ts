@@ -1,6 +1,7 @@
-import { RoomDataPacket } from '../../shared/types';
+import { RoomDataPacket, SoundHint } from '../../shared/types';
 import { validateCommandInput, sanitizeInput } from '../../shared/validators';
 import { SocketService } from './services/SocketService';
+import { SoundManager } from './services/SoundManager';
 import { ChatOutput } from './ui/ChatOutput';
 import { StatsPanel } from './ui/StatsPanel';
 import { InventoryPanel } from './ui/InventoryPanel';
@@ -14,16 +15,19 @@ import { LoginOverlay } from './ui/LoginOverlay';
  */
 class GameClient {
     private socket: SocketService;
+    private sound: SoundManager;
     private chat: ChatOutput;
     private stats: StatsPanel;
     private inventory: InventoryPanel;
     private minimap: Minimap;
     private controls: Controls;
     private loginOverlay: LoginOverlay;
+    private previousHp: number = 0;
 
     constructor() {
         // Initialize services
         this.socket = new SocketService();
+        this.sound = new SoundManager();
 
         // Initialize UI components
         this.chat = new ChatOutput();
@@ -55,24 +59,30 @@ class GameClient {
         });
 
         this.socket.onLoginSuccess((data) => {
+            // Initialize sound on first user interaction (login)
+            this.sound.initialize();
             this.chat.addLog(
                 `Logged in as ${data.player.character.name}. Welcome to ${data.worldName}!`,
                 'success'
             );
             this.loginOverlay.hide();
             this.controls.focus();
+            this.previousHp = data.player.hp;
         });
 
-        this.socket.onMessage((msg) => {
+        this.socket.onMessage((msg, soundHint) => {
             this.chat.addLog(msg, 'info');
+            this.sound.playHint(soundHint);
         });
 
-        this.socket.onError((msg) => {
+        this.socket.onError((msg, soundHint) => {
             this.chat.addLog(`Error: ${msg}`, 'error');
+            this.sound.playHint(soundHint);
         });
 
         this.socket.onRoomData((data) => {
             this.handleRoomData(data);
+            this.sound.playHint(data.soundHint);
         });
 
         this.socket.onUpdateInventory((inventory) => {
@@ -80,7 +90,17 @@ class GameClient {
         });
 
         this.socket.onUpdateStats((stats) => {
+            // Detect HP changes for damage/heal sounds (if not covered by message hints)
+            if (stats.hp < this.previousHp) {
+                // Taking damage - but don't double-play if server already sent hint
+            }
+            this.previousHp = stats.hp;
             this.stats.updateStats(stats);
+        });
+
+        // Standalone sound events (for sounds without accompanying messages)
+        this.socket.onSound((soundHint) => {
+            this.sound.play(soundHint);
         });
     }
 
@@ -98,6 +118,22 @@ class GameClient {
         // Expose debug function to window
         (window as any).debug = () => {
             this.sendCommand('debug');
+        };
+
+        // Expose sound controls to window for debugging/testing
+        (window as any).sound = {
+            toggle: () => {
+                const enabled = this.sound.toggle();
+                this.chat.addLog(`Sound ${enabled ? 'enabled' : 'disabled'}`, 'info');
+                return enabled;
+            },
+            setVolume: (vol: number) => {
+                this.sound.setVolume(vol);
+                this.chat.addLog(`Volume set to ${Math.round(vol * 100)}%`, 'info');
+            },
+            test: (hint: SoundHint) => {
+                this.sound.play(hint);
+            }
         };
     }
 

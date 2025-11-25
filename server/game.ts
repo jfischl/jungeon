@@ -11,6 +11,7 @@ import { ConnectionManager } from './managers/ConnectionManager';
 import { CommandRegistry } from './commands/CommandRegistry';
 import { WorldService } from './services/WorldService';
 import { gameLogger, playerLogger } from './logger';
+import { emitMessage, emitSound } from './utils/socketEmit';
 
 export class GameManager {
     io: Server;
@@ -129,11 +130,11 @@ export class GameManager {
             const keyId = currentRoom.locks[direction];
             const hasKey = player.inventory.items.some(i => i.id === keyId);
             if (!hasKey) {
-                socket.emit('message', `The ${direction} door is locked. You need a key.`);
+                emitMessage(socket, `The ${direction} door is locked. You need a key.`, 'door-locked');
                 return;
             } else {
                 const key = player.inventory.items.find(i => i.id === keyId);
-                socket.emit('message', `The ${direction} door is locked. Try 'unlock ${direction}' to use your ${key?.name}.`);
+                emitMessage(socket, `The ${direction} door is locked. Try 'unlock ${direction}' to use your ${key?.name}.`, 'door-locked');
                 return;
             }
         }
@@ -178,7 +179,8 @@ export class GameManager {
             players: otherPlayers,
             items: room.items, // Use room.items
             ghosts: ghostDescs,
-            minimap: this.worldService.getMinimap(player)
+            minimap: this.worldService.getMinimap(player),
+            soundHint: ghostsHere.length > 0 ? 'ghost-nearby' : undefined
         };
 
         socket.emit('roomData', description);
@@ -230,7 +232,7 @@ export class GameManager {
             if (itemIndex !== -1) {
                 const item = room.items.splice(itemIndex, 1)[0];
                 player.inventory.items.push(item);
-                socket.emit('message', `You picked up ${item.name}.`);
+                emitMessage(socket, `You picked up ${item.name}.`, 'pickup-item');
                 socket.emit('updateInventory', player.inventory);
                 this.worldService.broadcastToRoom(roomId, `${player.character.name} picks up ${item.name}.`, socket.id);
                 this.look(socket);
@@ -255,7 +257,7 @@ export class GameManager {
                 const amount = room.coins;
                 room.coins = 0; // Clear room coins atomically after reading
                 player.inventory.coins += amount;
-                socket.emit('message', `You collected ${amount} coins.`);
+                emitMessage(socket, `You collected ${amount} coins.`, 'pickup-coins');
                 socket.emit('updateInventory', player.inventory);
                 this.worldService.broadcastToRoom(roomId, `${player.character.name} collects some coins.`, socket.id);
                 this.look(socket);
@@ -280,7 +282,7 @@ export class GameManager {
                 const amount = player.inventory.coins;
                 player.inventory.coins = 0;
                 room.coins += amount;
-                socket.emit('message', `You dropped ${amount} coins.`);
+                emitMessage(socket, `You dropped ${amount} coins.`, 'drop');
                 socket.emit('updateInventory', player.inventory);
                 this.worldService.broadcastToRoom(roomId, `${player.character.name} drops some coins.`, socket.id);
                 this.look(socket);
@@ -314,7 +316,7 @@ export class GameManager {
         }
 
         const sanitized = sanitizeInput(message);
-        this.worldService.broadcastToRoom(player.roomId, `${player.character.name} says: "${sanitized}"`, socket.id);
+        this.worldService.broadcastToRoom(player.roomId, `${player.character.name} says: "${sanitized}"`, socket.id, 'chat');
         socket.emit('message', `You say: "${sanitized}"`);
     }
 
@@ -378,7 +380,7 @@ export class GameManager {
                 this.roomManager.getExitRoomId(ghost.roomId, direction)
             );
 
-            this.worldService.broadcastToRoom(nextRoomId, `${ghost.name} floats in from the ${this.getOppositeDirection(dir)}.`);
+            this.worldService.broadcastToRoom(nextRoomId, `${ghost.name} floats in from the ${this.getOppositeDirection(dir)}.`, undefined, 'ghost-enters');
         }
     }
 

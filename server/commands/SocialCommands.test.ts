@@ -77,7 +77,7 @@ describe('Social Commands', () => {
             expect(mockIo.to).toHaveBeenCalledWith(player2.id);
             expect(mockIo.emit).toHaveBeenCalledWith(
                 'message',
-                `${player1.character.name} says: "Hello everyone!"`
+                { message: `${player1.character.name} says: "Hello everyone!"`, soundHint: 'chat' }
             );
         });
 

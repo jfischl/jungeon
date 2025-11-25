@@ -1,7 +1,8 @@
 import { io, Socket } from 'socket.io-client';
-import { RoomDataPacket, Inventory, Player } from '../../../shared/types';
+import { RoomDataPacket, Inventory, Player, SoundHint } from '../../../shared/types';
 
-type MessageCallback = (message: string) => void;
+type MessageCallback = (message: string, soundHint?: SoundHint) => void;
+type SoundCallback = (soundHint: SoundHint) => void;
 type RoomDataCallback = (data: RoomDataPacket) => void;
 type InventoryCallback = (inventory: Inventory) => void;
 type StatsCallback = (stats: {
@@ -57,11 +58,28 @@ export class SocketService {
     }
 
     onMessage(callback: MessageCallback): void {
-        this.socket.on('message', callback);
+        this.socket.on('message', (data: string | { message: string; soundHint?: SoundHint }) => {
+            // Handle both legacy string messages and new object format
+            if (typeof data === 'string') {
+                callback(data);
+            } else {
+                callback(data.message, data.soundHint);
+            }
+        });
     }
 
     onError(callback: MessageCallback): void {
-        this.socket.on('error', callback);
+        this.socket.on('error', (data: string | { message: string; soundHint?: SoundHint }) => {
+            if (typeof data === 'string') {
+                callback(data, 'error');
+            } else {
+                callback(data.message, data.soundHint || 'error');
+            }
+        });
+    }
+
+    onSound(callback: SoundCallback): void {
+        this.socket.on('sound', callback);
     }
 
     onRoomData(callback: RoomDataCallback): void {

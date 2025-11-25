@@ -4,6 +4,7 @@ import { GameManager } from '../game';
 import { CONFIG } from '../config';
 import { Player } from '../../shared/types';
 import { Ghost } from '../managers/GhostManager';
+import { emitMessage, emitSound } from '../utils/socketEmit';
 
 export class AttackCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -71,7 +72,7 @@ export class AttackCommand implements Command {
             ghost.hp -= damage;
             const isCrit = damage > (player.attack - ghost.defense / 2 + 6); // Rough crit detection
 
-            socket.emit('message', `You attack ${ghost.name} for ${damage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`);
+            emitMessage(socket, `You attack ${ghost.name} for ${damage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`, isCrit ? 'attack-critical' : 'attack');
             socket.emit('message', `${ghost.name}: ${ghost.hp}/${ghost.maxHp} HP`);
             game.worldService.broadcastToRoom(player.roomId, `${player.character.name} attacks ${ghost.name}!`, socket.id);
 
@@ -95,7 +96,7 @@ export class AttackCommand implements Command {
                         // Award XP even if socket not found (for tests)
                         if (participantSocket) {
                             game.combatManager.awardExperience(participant, xpPerPlayer, participantSocket);
-                            participantSocket.emit('message', `💀 ${ghost.name} was defeated! You receive ${goldPerPlayer} coins and ${xpPerPlayer} XP!`);
+                            emitMessage(participantSocket, `💀 ${ghost.name} was defeated! You receive ${goldPerPlayer} coins and ${xpPerPlayer} XP!`, 'victory');
                             participantSocket.emit('updateInventory', participant.inventory);
                             game.sendStats(participantSocket);
                         } else {
@@ -147,7 +148,7 @@ export class AttackCommand implements Command {
                             if (combatant.isDefending) {
                                 combatantSocket.emit('message', `Your defense reduces the damage!`);
                             }
-                            combatantSocket.emit('message', `${ghost.name} strikes you for ${ghostDamage} damage!`);
+                            emitMessage(combatantSocket, `${ghost.name} strikes you for ${ghostDamage} damage!`, 'damage-taken');
                             combatantSocket.emit('message', `Your HP: ${combatant.hp}/${combatant.maxHp}`);
                             game.sendStats(combatantSocket);
 
@@ -220,7 +221,7 @@ export class AttackCommand implements Command {
         const isCrit = damage > (attacker.attack - defender.defense / 2 + 6);
 
         // Notify attacker
-        socket.emit('message', `You attack ${defender.character.name} for ${actualDamage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`);
+        emitMessage(socket, `You attack ${defender.character.name} for ${actualDamage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`, isCrit ? 'attack-critical' : 'attack');
         game.sendStats(socket);
 
         // Notify defender
@@ -228,7 +229,7 @@ export class AttackCommand implements Command {
             ? Array.from(game.io.sockets.sockets.values()).find(s => s.id === defender.id)
             : undefined;
         if (defenderSocket) {
-            defenderSocket.emit('message', `${attacker.character.name} attacks you for ${actualDamage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`);
+            emitMessage(defenderSocket, `${attacker.character.name} attacks you for ${actualDamage} damage!${isCrit ? ' CRITICAL HIT!' : ''}`, 'damage-taken');
             defenderSocket.emit('message', `Your HP: ${defender.hp}/${defender.maxHp}`);
             game.sendStats(defenderSocket);
         }

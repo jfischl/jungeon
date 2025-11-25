@@ -67,17 +67,21 @@ describe('Ghost Movement Edge Cases', () => {
             // Should not get "already in combat" error
             const messages = mockSocket.emit.mock.calls
                 .filter((call: any) => call[0] === 'message')
-                .map((call: any) => call[1]);
+                .map((call: any) => {
+                    // Handle both string and object message formats
+                    const msg = call[1];
+                    return typeof msg === 'string' ? msg : msg.message;
+                });
 
             const hasAlreadyInCombatError = messages.some((msg: string) =>
-                msg.includes("already in combat")
+                msg && msg.includes("already in combat")
             );
 
             expect(hasAlreadyInCombatError).toBe(false);
 
             // Should successfully engage
             const hasEngageMessage = messages.some((msg: string) =>
-                msg.includes("engage") || msg.includes("attack")
+                msg && (msg.includes("engage") || msg.includes("attack"))
             );
 
             expect(hasEngageMessage).toBe(true);

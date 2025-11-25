@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { Command } from './Command';
 import { GameManager } from '../game';
+import { emitMessage } from '../utils/socketEmit';
 
 export class FleeCommand implements Command {
     execute(socket: Socket, args: string, game: GameManager): void {
@@ -16,7 +17,7 @@ export class FleeCommand implements Command {
 
         if (fleeChance < 0.7) {
             // Successfully fled
-            socket.emit('message', `You fled from combat with ${player.combatTarget}!`);
+            emitMessage(socket, `You fled from combat with ${player.combatTarget}!`, 'flee');
             game.worldService.broadcastToRoom(player.roomId, `${player.character.name} fled from combat!`, socket.id);
 
             player.inCombat = false;
@@ -27,7 +28,7 @@ export class FleeCommand implements Command {
             const fleePenalty = Math.floor(Math.random() * 10) + 5;
             player.hp -= fleePenalty;
 
-            socket.emit('message', `Failed to flee! You stumble and take ${fleePenalty} damage!`);
+            emitMessage(socket, `Failed to flee! You stumble and take ${fleePenalty} damage!`, 'flee-fail');
             socket.emit('message', `Your HP: ${player.hp}/${player.maxHp}`);
             game.sendStats(socket);
 
